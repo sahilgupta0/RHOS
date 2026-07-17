@@ -1,0 +1,4 @@
+id,patient_id,allergen,severity,reaction,noted_date
+A044,P002,Aspirin,severe,Itching,2021-08-06
+A061,P002,Penicillin,mild,Anaphylaxis,2019-03-24
+A170,P001,Aspirin,mild,Skin rash,2022-03-20

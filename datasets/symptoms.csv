@@ -1,0 +1,11 @@
+id,name,category,body_system,severity_range,common_conditions
+S001,Fever,General,General,Mild-Severe,Various
+S002,Cough,Respiratory,Respiratory,Mild-Moderate,Various
+S003,Shortness of Breath,Respiratory,Respiratory,Moderate-Severe,Various
+S004,Chest Pain,Cardiovascular,Cardiovascular,Severe,Various
+S005,Abdominal Pain,Gastrointestinal,Gastrointestinal,Mild-Severe,Various
+S006,Diarrhea,Gastrointestinal,Gastrointestinal,Mild-Moderate,Various
+S007,Vomiting,Gastrointestinal,Gastrointestinal,Mild-Moderate,Various
+S008,Headache,Neurological,Neurological,Mild-Moderate,Various
+S009,Joint Pain,Musculoskeletal,Musculoskeletal,Mild-Moderate,Various
+S010,Skin Rash,Dermatological,Dermatological,Mild-Moderate,Various

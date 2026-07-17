@@ -1,0 +1,4 @@
+id,name,type,district,beds,specialties,lat,lng
+H001,Khandela PHC,PHC,Sikar,10,General Medicine,27.608,75.5015
+H002,Ringus CHC,CHC,Sikar,30,General Medicine,27.3525,75.569
+H003,Sikar District Hospital,District Hospital,Sikar,250,General Medicine,27.612,75.139

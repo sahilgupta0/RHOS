@@ -1,0 +1,9 @@
+id,name,age,gender,blood_group,village_id,asha_worker_id,phone,aadhaar,is_active
+P001,Dinesh Sharma,33,Male,A+,V006,,+91-925769943,XXXX-XXXX-1810,True
+P002,Mohan Kumar,64,Male,B+,V004,AW005,+91-955507663,XXXX-XXXX-1762,True
+P003,Hari Jat,2,Male,O+,V003,AW004,+91-923102028,XXXX-XXXX-5717,True
+P004,Gopal Bunkar,66,Male,B-,V003,AW004,+91-979856491,XXXX-XXXX-4442,True
+P005,Dinesh Gurjar,19,Male,AB+,V002,AW003,+91-952603328,XXXX-XXXX-4790,True
+P006,Sarla Jat,50,Female,A+,V001,AW001,+91-983090534,XXXX-XXXX-2378,True
+P04B11B,Sahil Kumar Gupta,30,Male,O+,V001,,7676215348,,True
+PC95E1D,manish,30,Male,O+,V001,,34552346345,,True

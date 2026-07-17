@@ -1,0 +1,5 @@
+id,patient_id,doctor_id,date,time,status,type
+AP008,P004,demo-doctor-001,2026-08-13,11:45,cancelled,General Checkup
+AP288,P001,demo-doctor-001,2026-07-07,11:45,no-show,General Checkup
+AP340,P002,demo-doctor-001,2026-07-30,11:45,cancelled,General Checkup
+AP365,P002,demo-doctor-001,2026-07-07,12:00,no-show,General Checkup

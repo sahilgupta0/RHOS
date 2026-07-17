@@ -1,0 +1,7 @@
+id,name,district,state,population,nearest_hospital_id,lat,lng
+V001,Khandela,Sikar,Rajasthan,8500,H001,27.6087,75.5009
+V002,Ringus,Sikar,Rajasthan,12000,H001,27.3533,75.5683
+V003,Neem Ka Thana,Sikar,Rajasthan,15000,H001,27.7397,75.7876
+V004,Sri Madhopur,Sikar,Rajasthan,9800,H001,27.4719,75.5975
+V005,Chomu,Sikar,Rajasthan,25000,H001,27.1672,75.7208
+V006,Phulera,Sikar,Rajasthan,14000,H001,26.8775,75.2411

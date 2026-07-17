@@ -1,0 +1,5 @@
+id,patient_id,date,type,chief_complaint,doctor_id
+V044,P004,2025-09-08T09:18:43.532925,walk-in,Complaining of abdominal pain,demo-doctor-001
+V258,P003,2025-08-24T03:18:43.534617,walk-in,Complaining of fever,demo-doctor-001
+V380,P002,2026-02-21T02:18:43.535397,follow-up,Complaining of joint pain,demo-doctor-001
+V473,P004,2025-09-09T00:18:43.535982,walk-in,Complaining of headache,demo-doctor-001
