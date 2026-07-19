@@ -10,8 +10,14 @@ from datetime import date, datetime
 
 from pydantic import Field
 
-from app.models.common import (AllergySeverity, BloodGroup, FirestoreDocument,
-                               Gender, MedicalConditionStatus, TimestampMixin)
+from app.models.common import (
+    AllergySeverity,
+    BloodGroup,
+    FirestoreDocument,
+    Gender,
+    MedicalConditionStatus,
+    TimestampMixin,
+)
 
 
 class Patient(FirestoreDocument, TimestampMixin):

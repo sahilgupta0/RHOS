@@ -94,8 +94,16 @@ def create_app() -> FastAPI:
 
 def _register_routes(app: FastAPI) -> None:
     """Register all API route modules."""
-    from app.api import (analytics, auth, consultation, health, patient,
-                         prompts, speech, upload)
+    from app.api import (
+        analytics,
+        auth,
+        consultation,
+        health,
+        patient,
+        prompts,
+        speech,
+        upload,
+    )
 
     app.include_router(health.router, tags=["Health"])
     app.include_router(auth.router, prefix="/auth", tags=["Authentication"])

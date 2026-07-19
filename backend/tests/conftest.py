@@ -263,6 +263,7 @@ gemini_module.analyze_image = mock_analyze_image
 from fastapi.testclient import TestClient
 
 from app.core.security import create_access_token
+
 # Now import fastapi app safely
 from app.main import app as fastapi_app
 

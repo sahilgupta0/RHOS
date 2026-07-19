@@ -11,8 +11,13 @@ from typing import Any
 
 from pydantic import BaseModel, EmailStr, Field
 
-from app.models.common import (AllergySeverity, BloodGroup, Gender,
-                               TriagePriority, UserRole)
+from app.models.common import (
+    AllergySeverity,
+    BloodGroup,
+    Gender,
+    TriagePriority,
+    UserRole,
+)
 
 # ── Auth Schemas ───────────────────────────────────────────────────────────────
 

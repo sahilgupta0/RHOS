@@ -21,16 +21,26 @@ from app.agents.medicine_agent import medicine_agent
 from app.agents.triage_agent import triage_agent
 from app.dependencies import CurrentUser
 from app.repositories.consultation_repository import ConsultationRepository
-from app.repositories.patient_repository import (AllergyRepository,
-                                                 MedicalHistoryRepository,
-                                                 PatientRepository,
-                                                 VitalsRepository)
-from app.schemas import (ConsultationChatRequest, ConsultationChatResponse,
-                         ConsultationResponse, ConsultationStartRequest,
-                         ConsultationSubmitRequest, MedicineCheckRequest,
-                         MedicineCheckResponse, SummaryRequest,
-                         SummaryResponse, TriageRequest, TriageResponse,
-                         VisionAnalysisResponse)
+from app.repositories.patient_repository import (
+    AllergyRepository,
+    MedicalHistoryRepository,
+    PatientRepository,
+    VitalsRepository,
+)
+from app.schemas import (
+    ConsultationChatRequest,
+    ConsultationChatResponse,
+    ConsultationResponse,
+    ConsultationStartRequest,
+    ConsultationSubmitRequest,
+    MedicineCheckRequest,
+    MedicineCheckResponse,
+    SummaryRequest,
+    SummaryResponse,
+    TriageRequest,
+    TriageResponse,
+    VisionAnalysisResponse,
+)
 from app.services.gemini import analyze_image, generate_text
 from app.services.medication import check_drug_interactions
 

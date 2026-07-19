@@ -16,11 +16,9 @@ from fastapi import APIRouter, HTTPException, status
 from app.config import get_settings
 from app.core.firebase_init import is_firebase_initialized
 from app.core.mongodb import get_mongodb_db
-from app.core.security import (create_access_token, hash_password,
-                               verify_password)
+from app.core.security import create_access_token, hash_password, verify_password
 from app.dependencies import CurrentUser
-from app.schemas import (AuthResponse, LoginRequest, RegisterRequest,
-                         UserResponse)
+from app.schemas import AuthResponse, LoginRequest, RegisterRequest, UserResponse
 
 logger = logging.getLogger(__name__)
 

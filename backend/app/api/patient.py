@@ -12,12 +12,18 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, Query, status
 
 from app.dependencies import CurrentUser
-from app.repositories.patient_repository import (AllergyRepository,
-                                                 MedicalHistoryRepository,
-                                                 PatientRepository,
-                                                 VitalsRepository)
-from app.schemas import (PatientCreate, PatientListResponse, PatientResponse,
-                         PatientUpdate)
+from app.repositories.patient_repository import (
+    AllergyRepository,
+    MedicalHistoryRepository,
+    PatientRepository,
+    VitalsRepository,
+)
+from app.schemas import (
+    PatientCreate,
+    PatientListResponse,
+    PatientResponse,
+    PatientUpdate,
+)
 
 logger = logging.getLogger(__name__)
 

@@ -9,9 +9,13 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from app.models.analytics import (AnalyticsResponse, DashboardStats,
-                                  DiseaseDistribution, PatientTrend,
-                                  VillageStats)
+from app.models.analytics import (
+    AnalyticsResponse,
+    DashboardStats,
+    DiseaseDistribution,
+    PatientTrend,
+    VillageStats,
+)
 from app.repositories.analytics_repository import AnalyticsRepository
 
 logger = logging.getLogger(__name__)
