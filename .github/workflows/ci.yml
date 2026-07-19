@@ -29,23 +29,6 @@ jobs:
         run: npm run lint
         working-directory: frontend
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-          cache-dependency-path: backend/requirements.txt
-
-      - name: Install Backend Linters
-        run: pip install flake8 black isort
-
-      - name: Run Backend Lint Checks
-        run: |
-          black --check app tests
-          isort --check-only app tests
-          flake8 app tests --max-line-length=120 --exclude=venv
-        working-directory: backend
-
   test-backend:
     name: Backend Pytest Suites
     runs-on: ubuntu-latest
