@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, TypeVar, Generic
+from typing import Any, Generic, TypeVar
 
 from app.core.mongodb import get_mongodb_db
 
@@ -41,7 +41,9 @@ def _parse_filters(filters: list[tuple[str, str, Any]] | None) -> dict[str, Any]
         if mongo_op == "$eq":
             field_conditions[field] = value
         else:
-            if field not in field_conditions or not isinstance(field_conditions[field], dict):
+            if field not in field_conditions or not isinstance(
+                field_conditions[field], dict
+            ):
                 field_conditions[field] = {}
             field_conditions[field][mongo_op] = value
 
@@ -61,7 +63,9 @@ class BaseRepository:
         """Get the MongoDB collection reference."""
         db = get_mongodb_db()
         if db is None:
-            raise ConnectionError("MongoDB is not initialized. Check MongoDB configuration.")
+            raise ConnectionError(
+                "MongoDB is not initialized. Check MongoDB configuration."
+            )
         return db[self.collection_name]
 
     async def get_by_id(self, doc_id: str) -> dict[str, Any] | None:
@@ -73,7 +77,9 @@ class BaseRepository:
                 return doc
             return None
         except Exception as e:
-            logger.error("Error getting document %s/%s: %s", self.collection_name, doc_id, e)
+            logger.error(
+                "Error getting document %s/%s: %s", self.collection_name, doc_id, e
+            )
             raise
 
     async def create(self, data: dict[str, Any], doc_id: str | None = None) -> str:
@@ -84,6 +90,7 @@ class BaseRepository:
                 doc_data["_id"] = doc_id
             else:
                 import uuid
+
                 doc_id = uuid.uuid4().hex
                 doc_data["_id"] = doc_id
 
@@ -98,7 +105,9 @@ class BaseRepository:
         try:
             await self._collection.update_one({"_id": doc_id}, {"$set": data})
         except Exception as e:
-            logger.error("Error updating document %s/%s: %s", self.collection_name, doc_id, e)
+            logger.error(
+                "Error updating document %s/%s: %s", self.collection_name, doc_id, e
+            )
             raise
 
     async def delete(self, doc_id: str) -> None:
@@ -106,7 +115,9 @@ class BaseRepository:
         try:
             await self._collection.delete_one({"_id": doc_id})
         except Exception as e:
-            logger.error("Error deleting document %s/%s: %s", self.collection_name, doc_id, e)
+            logger.error(
+                "Error deleting document %s/%s: %s", self.collection_name, doc_id, e
+            )
             raise
 
     async def list_all(
@@ -135,7 +146,10 @@ class BaseRepository:
             if order_by:
                 sort_field = "_id" if order_by == "id" else order_by
                 from pymongo import ASCENDING, DESCENDING
-                sort_dir = DESCENDING if direction.upper() == "DESCENDING" else ASCENDING
+
+                sort_dir = (
+                    DESCENDING if direction.upper() == "DESCENDING" else ASCENDING
+                )
                 cursor = cursor.sort(sort_field, sort_dir)
 
             # Apply pagination
@@ -162,7 +176,9 @@ class BaseRepository:
             logger.error("Error counting documents in %s: %s", self.collection_name, e)
             return 0
 
-    async def search(self, field: str, value: str, limit: int = 20) -> list[dict[str, Any]]:
+    async def search(
+        self, field: str, value: str, limit: int = 20
+    ) -> list[dict[str, Any]]:
         """Simple search by field value (exact match or prefix)."""
         try:
             query = {field: {"$regex": f"^{re.escape(value)}", "$options": "i"}}
@@ -173,5 +189,7 @@ class BaseRepository:
                 results.append(doc)
             return results
         except Exception as e:
-            logger.error("Error searching %s by %s=%s: %s", self.collection_name, field, value, e)
+            logger.error(
+                "Error searching %s by %s=%s: %s", self.collection_name, field, value, e
+            )
             return []

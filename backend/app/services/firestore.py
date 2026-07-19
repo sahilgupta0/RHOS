@@ -33,7 +33,9 @@ async def get_document(collection: str, doc_id: str) -> dict[str, Any] | None:
         return None
 
 
-async def save_document(collection: str, data: dict[str, Any], doc_id: str | None = None) -> str:
+async def save_document(
+    collection: str, data: dict[str, Any], doc_id: str | None = None
+) -> str:
     """Save a document to a collection. Returns document ID."""
     db = get_firestore_client()
     if db is None:

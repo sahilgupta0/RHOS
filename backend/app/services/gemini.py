@@ -50,7 +50,9 @@ async def generate_text(
             max_output_tokens=max_tokens,
         )
 
-        full_prompt = f"{system_instruction}\n\n{prompt}" if system_instruction else prompt
+        full_prompt = (
+            f"{system_instruction}\n\n{prompt}" if system_instruction else prompt
+        )
 
         print("\n\n\nFull prompt: ", full_prompt)
         response = model.generate_content(
@@ -112,6 +114,7 @@ Respond with valid JSON only."""
     # Try to parse JSON response
     try:
         import json
+
         # Extract JSON from response if wrapped in markdown
         json_str = response.strip()
         if json_str.startswith("```"):

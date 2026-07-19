@@ -16,6 +16,7 @@ from app.models.common import FirestoreDocument, TimestampMixin, TriagePriority
 
 class Consultation(FirestoreDocument, TimestampMixin):
     """A single consultation session."""
+
     patient_id: str
     patient_name: str = ""
     doctor_id: str = ""
@@ -40,6 +41,7 @@ class Consultation(FirestoreDocument, TimestampMixin):
 
 class TriageLog(FirestoreDocument, TimestampMixin):
     """Log of a triage classification decision."""
+
     consultation_id: str
     patient_id: str
     priority: TriagePriority
@@ -52,6 +54,7 @@ class TriageLog(FirestoreDocument, TimestampMixin):
 
 class VisionResult(FirestoreDocument, TimestampMixin):
     """Result from medical image analysis."""
+
     consultation_id: str
     patient_id: str
     image_url: str
@@ -65,6 +68,7 @@ class VisionResult(FirestoreDocument, TimestampMixin):
 
 class DoctorNote(FirestoreDocument, TimestampMixin):
     """Doctor's clinical note for a consultation."""
+
     consultation_id: str
     patient_id: str
     doctor_id: str = ""

@@ -10,18 +10,13 @@ from datetime import date, datetime
 
 from pydantic import Field
 
-from app.models.common import (
-    AllergySeverity,
-    BloodGroup,
-    FirestoreDocument,
-    Gender,
-    MedicalConditionStatus,
-    TimestampMixin,
-)
+from app.models.common import (AllergySeverity, BloodGroup, FirestoreDocument,
+                               Gender, MedicalConditionStatus, TimestampMixin)
 
 
 class Patient(FirestoreDocument, TimestampMixin):
     """Patient demographic and identification data."""
+
     name: str
     age: int
     gender: Gender
@@ -42,6 +37,7 @@ class Patient(FirestoreDocument, TimestampMixin):
 
 class MedicalHistory(FirestoreDocument, TimestampMixin):
     """Patient medical history entry."""
+
     patient_id: str
     condition: str
     diagnosed_date: date | None = None
@@ -54,6 +50,7 @@ class MedicalHistory(FirestoreDocument, TimestampMixin):
 
 class Vital(FirestoreDocument):
     """Patient vital signs measurement."""
+
     patient_id: str
     visit_id: str = ""
     recorded_at: datetime = Field(default_factory=datetime.now)
@@ -72,6 +69,7 @@ class Vital(FirestoreDocument):
 
 class Allergy(FirestoreDocument, TimestampMixin):
     """Patient allergy record."""
+
     patient_id: str
     allergen: str
     severity: AllergySeverity = AllergySeverity.MILD

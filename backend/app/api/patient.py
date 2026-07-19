@@ -12,13 +12,12 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, Query, status
 
 from app.dependencies import CurrentUser
-from app.repositories.patient_repository import (
-    AllergyRepository,
-    MedicalHistoryRepository,
-    PatientRepository,
-    VitalsRepository,
-)
-from app.schemas import PatientCreate, PatientListResponse, PatientResponse, PatientUpdate
+from app.repositories.patient_repository import (AllergyRepository,
+                                                 MedicalHistoryRepository,
+                                                 PatientRepository,
+                                                 VitalsRepository)
+from app.schemas import (PatientCreate, PatientListResponse, PatientResponse,
+                         PatientUpdate)
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +82,9 @@ async def get_patient(patient_id: str, current_user: CurrentUser):
         raise HTTPException(status_code=500, detail="Failed to retrieve patient.")
 
 
-@router.post("/patient", response_model=PatientResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/patient", response_model=PatientResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_patient(patient: PatientCreate, current_user: CurrentUser):
     """Create a new patient record."""
     try:
@@ -101,7 +102,9 @@ async def create_patient(patient: PatientCreate, current_user: CurrentUser):
 
 
 @router.put("/patient/{patient_id}", response_model=PatientResponse)
-async def update_patient(patient_id: str, update: PatientUpdate, current_user: CurrentUser):
+async def update_patient(
+    patient_id: str, update: PatientUpdate, current_user: CurrentUser
+):
     """Update patient details."""
     try:
         existing = await patient_repo.get_by_id(patient_id)
@@ -143,4 +146,6 @@ async def get_patient_history(patient_id: str, current_user: CurrentUser):
         raise
     except Exception as e:
         logger.error("Error getting history for patient %s: %s", patient_id, e)
-        raise HTTPException(status_code=500, detail="Failed to retrieve patient history.")
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve patient history."
+        )

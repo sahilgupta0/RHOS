@@ -9,11 +9,12 @@ from __future__ import annotations
 import logging
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, Header, status
+from fastapi import Depends, Header, HTTPException, status
 
 from app.config import Settings, get_settings
+from app.core.firebase_init import (get_firestore_client,
+                                    is_firebase_initialized)
 from app.core.security import decode_access_token
-from app.core.firebase_init import get_firestore_client, is_firebase_initialized
 from app.schemas import UserResponse
 
 logger = logging.getLogger(__name__)
@@ -25,6 +26,7 @@ SettingsDep = Annotated[Settings, Depends(get_settings)]
 
 
 # ── Authentication ─────────────────────────────────────────────────────────────
+
 
 async def get_current_user(
     authorization: str | None = Header(None, alias="Authorization"),
@@ -54,6 +56,7 @@ async def _verify_firebase_token(token: str) -> UserResponse:
     """Verify a Firebase ID token."""
     try:
         from firebase_admin import auth as firebase_auth
+
         decoded = firebase_auth.verify_id_token(token)
         return UserResponse(
             id=decoded.get("uid", ""),
@@ -88,6 +91,7 @@ def _verify_local_token(token: str) -> UserResponse:
 
 
 # ── Optional Auth (for public endpoints that benefit from auth) ────────────────
+
 
 async def get_optional_user(
     authorization: str | None = Header(None, alias="Authorization"),

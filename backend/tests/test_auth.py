@@ -1,11 +1,9 @@
 import pytest
 
+
 def test_login_success(client):
     """Test login with valid demo user credentials."""
-    payload = {
-        "email": "doctor@rhos.in",
-        "password": "doctor123"
-    }
+    payload = {"email": "doctor@rhos.in", "password": "doctor123"}
     response = client.post("/auth/login", json=payload)
     assert response.status_code == 200
     data = response.json()
@@ -17,10 +15,7 @@ def test_login_success(client):
 
 def test_login_invalid_credentials(client):
     """Test login fails with invalid credentials."""
-    payload = {
-        "email": "doctor@rhos.in",
-        "password": "wrong-password"
-    }
+    payload = {"email": "doctor@rhos.in", "password": "wrong-password"}
     response = client.post("/auth/login", json=payload)
     assert response.status_code == 401
     assert "detail" in response.json()
@@ -33,7 +28,7 @@ def test_register_success(client, mock_db_setup):
         "password": "secure_password",
         "name": "Nurse Joy",
         "role": "nurse",
-        "phone": "+91-9999999999"
+        "phone": "+91-9999999999",
     }
     response = client.post("/auth/register", json=payload)
     assert response.status_code == 200
@@ -51,7 +46,7 @@ def test_register_duplicate_email(client):
         "password": "another-password",
         "name": "Another Doctor",
         "role": "doctor",
-        "phone": "+91-8888888888"
+        "phone": "+91-8888888888",
     }
     response = client.post("/auth/register", json=payload)
     assert response.status_code == 409

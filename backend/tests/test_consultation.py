@@ -1,11 +1,12 @@
 import pytest
 
+
 def test_start_consultation(client, auth_header, mock_db_setup):
     """Test starting a new consultation session."""
     payload = {
         "patient_id": "p001",
         "chief_complaint": "Persistent headache",
-        "language": "en"
+        "language": "en",
     }
     response = client.post("/consultation/start", json=payload, headers=auth_header)
     assert response.status_code == 200
@@ -40,7 +41,7 @@ def test_medication_check(client, auth_header, mock_db_setup):
     payload = {
         "medications": ["Aspirin", "Ibuprofen"],
         "allergies": ["Penicillin"],
-        "conditions": ["Hypertension"]
+        "conditions": ["Hypertension"],
     }
     response = client.post("/medicine/check", json=payload, headers=auth_header)
     assert response.status_code == 200

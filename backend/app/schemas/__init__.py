@@ -9,16 +9,10 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Any
 
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
-from app.models.common import (
-    AllergySeverity,
-    BloodGroup,
-    Gender,
-    TriagePriority,
-    UserRole,
-)
-
+from app.models.common import (AllergySeverity, BloodGroup, Gender,
+                               TriagePriority, UserRole)
 
 # ── Auth Schemas ───────────────────────────────────────────────────────────────
 
@@ -140,7 +134,6 @@ class ConsultationChatResponse(BaseModel):
     agent_pipeline_status: dict[str, str] = Field(default_factory=dict)
 
 
-
 class ConsultationResponse(BaseModel):
     id: str
     patient_id: str
@@ -173,7 +166,9 @@ class TriageResponse(BaseModel):
     reasoning: str = ""
     confidence: float = 0.0
     recommendations: list[str] = Field(default_factory=list)
-    disclaimer: str = "AI-assisted triage. Final assessment by qualified medical professional required."
+    disclaimer: str = (
+        "AI-assisted triage. Final assessment by qualified medical professional required."
+    )
 
 
 # ── Medicine Schemas ───────────────────────────────────────────────────────────
@@ -194,7 +189,9 @@ class MedicineCheckResponse(BaseModel):
     warnings: list[str] = Field(default_factory=list)
     alternatives: list[dict[str, Any]] = Field(default_factory=list)
     safe_to_prescribe: bool = True
-    disclaimer: str = "AI-assisted medication review. Pharmacist/physician verification required."
+    disclaimer: str = (
+        "AI-assisted medication review. Pharmacist/physician verification required."
+    )
 
 
 # ── Vision Schemas ─────────────────────────────────────────────────────────────
@@ -237,7 +234,9 @@ class SummaryResponse(BaseModel):
     assessment: str = ""
     plan: str = ""
     follow_up: str = ""
-    disclaimer: str = "AI-generated clinical summary. Review and approval by treating physician required."
+    disclaimer: str = (
+        "AI-generated clinical summary. Review and approval by treating physician required."
+    )
 
 
 # ── Upload Schemas ─────────────────────────────────────────────────────────────

@@ -27,13 +27,18 @@ def calculate_distance_km(lat1: float, lng1: float, lat2: float, lng2: float) ->
     # Haversine formula
     dlat = rlat2 - rlat1
     dlng = rlng2 - rlng1
-    a = math.sin(dlat / 2)**2 + math.cos(rlat1) * math.cos(rlat2) * math.sin(dlng / 2)**2
+    a = (
+        math.sin(dlat / 2) ** 2
+        + math.cos(rlat1) * math.cos(rlat2) * math.sin(dlng / 2) ** 2
+    )
     c = 2 * math.asin(math.sqrt(a))
     r = 6371.0  # Radius of earth in kilometers
     return round(c * r, 2)
 
 
-async def get_nearest_hospitals(lat: float, lng: float, limit: int = 3) -> list[dict[str, Any]]:
+async def get_nearest_hospitals(
+    lat: float, lng: float, limit: int = 3
+) -> list[dict[str, Any]]:
     """
     Find the nearest hospitals/PHCs to a given coordinate.
     Uses mock spatial search over seeded hospital data.
@@ -43,6 +48,7 @@ async def get_nearest_hospitals(lat: float, lng: float, limit: int = 3) -> list[
     # We will search the database or return mock data.
     try:
         from app.core.mongodb import get_mongodb_db
+
         db = get_mongodb_db()
         if db is not None:
             cursor = db["hospitals"].find()
@@ -78,5 +84,5 @@ async def get_nearest_hospitals(lat: float, lng: float, limit: int = 3) -> list[
             "district": "Sikar",
             "distance_km": 12.8,
             "phone": "+91-1575-224422",
-        }
+        },
     ]

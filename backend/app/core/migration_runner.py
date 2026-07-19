@@ -7,11 +7,13 @@ import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+
 from app.core.mongodb import get_mongodb_db
 
 logger = logging.getLogger(__name__)
 
 MIGRATION_FILE_PATTERN = re.compile(r"^(\d{4})_.*\.py$")
+
 
 class MigrationRunner:
     """Versioned MongoDB migration runner executing upgrade and downgrade operations."""
@@ -26,14 +28,14 @@ class MigrationRunner:
         """Discover migration files in migrations directory, returning sorted list of (version_str, filename)."""
         if not os.path.exists(self.migrations_dir):
             return []
-        
+
         discovered = []
         for filename in os.listdir(self.migrations_dir):
             match = MIGRATION_FILE_PATTERN.match(filename)
             if match:
                 version = match.group(1)
                 discovered.append((version, filename))
-        
+
         # Sort migrations sequentially by version prefix
         discovered.sort(key=lambda x: x[0])
         return discovered
@@ -47,7 +49,9 @@ class MigrationRunner:
         """Apply all pending migrations. Returns list of applied version strings."""
         db = get_mongodb_db()
         if db is None:
-            logger.warning("MongoDB is not initialized. Skipping index/schema migrations.")
+            logger.warning(
+                "MongoDB is not initialized. Skipping index/schema migrations."
+            )
             return []
 
         applied = []
@@ -70,13 +74,15 @@ class MigrationRunner:
                 module = self._load_migration_module(filename)
                 if hasattr(module, "upgrade"):
                     await module.upgrade(db)
-                
+
                 # Record successful application
-                await history_col.insert_one({
-                    "_id": version,
-                    "filename": filename,
-                    "applied_at": datetime.utcnow().isoformat()
-                })
+                await history_col.insert_one(
+                    {
+                        "_id": version,
+                        "filename": filename,
+                        "applied_at": datetime.utcnow().isoformat(),
+                    }
+                )
                 applied.append(version)
                 logger.info("Successfully applied schema migration %s", version)
             except Exception as e:
@@ -95,7 +101,7 @@ class MigrationRunner:
             return None
 
         history_col = db["migration_history"]
-        
+
         # Find the latest applied migration in history
         cursor = history_col.find({}).sort("_id", -1).limit(1)
         latest_doc = None
@@ -109,13 +115,13 @@ class MigrationRunner:
 
         version = latest_doc["_id"]
         filename = latest_doc["filename"]
-        
+
         logger.info("Rolling back schema migration %s (%s)...", version, filename)
         try:
             module = self._load_migration_module(filename)
             if hasattr(module, "downgrade"):
                 await module.downgrade(db)
-            
+
             # Remove from history
             await history_col.delete_one({"_id": version})
             logger.info("Successfully rolled back schema migration %s", version)
@@ -123,5 +129,6 @@ class MigrationRunner:
         except Exception as e:
             logger.error("Failed rolling back schema migration %s: %s", version, e)
             raise RuntimeError(f"Rollback of migration {version} failed: {e}") from e
+
 
 migration_runner = MigrationRunner()

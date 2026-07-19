@@ -46,6 +46,7 @@ CRITICAL RULES:
 
         # Parse JSON from response
         import json
+
         clean_text = response_text.strip()
         if clean_text.startswith("```"):
             clean_text = clean_text.split("\n", 1)[1].rsplit("```", 1)[0]
@@ -58,8 +59,10 @@ CRITICAL RULES:
                 "description": response_text,
                 "findings": [],
                 "confidence": 0.5,
-                "recommendations": ["Correlate findings clinically with a medical professional."],
-                "disclaimer": "AI-generated description only. Not a medical diagnosis."
+                "recommendations": [
+                    "Correlate findings clinically with a medical professional."
+                ],
+                "disclaimer": "AI-generated description only. Not a medical diagnosis.",
             }
 
     except Exception as e:
@@ -69,5 +72,5 @@ CRITICAL RULES:
             "findings": [],
             "confidence": 0.0,
             "recommendations": [],
-            "disclaimer": "AI vision analysis failed."
+            "disclaimer": "AI vision analysis failed.",
         }

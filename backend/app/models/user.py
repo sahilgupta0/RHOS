@@ -15,6 +15,7 @@ from app.models.common import FirestoreDocument, TimestampMixin, UserRole
 
 class User(FirestoreDocument, TimestampMixin):
     """System user (doctor, nurse, admin)."""
+
     email: str
     name: str
     role: UserRole = UserRole.DOCTOR
@@ -35,6 +36,7 @@ class User(FirestoreDocument, TimestampMixin):
 
 class ASHAWorker(FirestoreDocument, TimestampMixin):
     """Accredited Social Health Activist (ASHA) worker."""
+
     name: str
     phone: str = ""
     village_id: str
@@ -49,6 +51,7 @@ class ASHAWorker(FirestoreDocument, TimestampMixin):
 
 class Hospital(FirestoreDocument):
     """Hospital / Primary Health Center."""
+
     name: str
     type: str = ""  # PHC, CHC, District Hospital, etc.
     district: str = ""
@@ -65,6 +68,7 @@ class Hospital(FirestoreDocument):
 
 class Village(FirestoreDocument):
     """Village demographic data."""
+
     name: str
     district: str = ""
     state: str = "Rajasthan"

@@ -15,8 +15,8 @@ from slowapi.errors import RateLimitExceeded
 
 from app.config import get_settings
 from app.core.firebase_init import init_firebase
-from app.core.mongodb import init_mongodb, close_mongodb
 from app.core.logging_config import setup_logging
+from app.core.mongodb import close_mongodb, init_mongodb
 from app.core.rate_limiter import limiter
 from app.middleware.cors import setup_cors
 from app.middleware.error_handler import setup_error_handlers
@@ -44,6 +44,7 @@ async def lifespan(app: FastAPI):
 
     # Apply database schema migrations automatically on startup
     from app.core.migration_runner import migration_runner
+
     try:
         logger.info("Applying pending database migrations on startup...")
         await migration_runner.run_upgrades()
@@ -93,7 +94,8 @@ def create_app() -> FastAPI:
 
 def _register_routes(app: FastAPI) -> None:
     """Register all API route modules."""
-    from app.api import health, auth, patient, consultation, analytics, upload, speech, prompts
+    from app.api import (analytics, auth, consultation, health, patient,
+                         prompts, speech, upload)
 
     app.include_router(health.router, tags=["Health"])
     app.include_router(auth.router, prefix="/auth", tags=["Authentication"])

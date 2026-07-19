@@ -45,7 +45,11 @@ async def speech_to_text(
 
         audio = speech.RecognitionAudio(content=audio_bytes)
         config = speech.RecognitionConfig(
-            encoding=getattr(speech.RecognitionConfig.AudioEncoding, encoding, speech.RecognitionConfig.AudioEncoding.WEBM_OPUS),
+            encoding=getattr(
+                speech.RecognitionConfig.AudioEncoding,
+                encoding,
+                speech.RecognitionConfig.AudioEncoding.WEBM_OPUS,
+            ),
             sample_rate_hertz=sample_rate,
             language_code=language,
             alternative_language_codes=["hi-IN", "en-US"],

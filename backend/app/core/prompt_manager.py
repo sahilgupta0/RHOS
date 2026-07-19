@@ -4,7 +4,9 @@ import logging
 import os
 from pathlib import Path
 from typing import Any
+
 from google.adk.agents.readonly_context import ReadonlyContext
+
 from app.core.mongodb import get_mongodb_db
 
 logger = logging.getLogger(__name__)
@@ -30,6 +32,7 @@ PROMPT_FILE_MAP = {
     "triage_agent": "triage.md",
     "vision_agent": "vision.md",
 }
+
 
 class PromptManager:
     """Manages system prompts with support for DB overrides, environment variables, and file fallbacks."""
@@ -67,7 +70,11 @@ class PromptManager:
                 self._cache[name] = content
                 return content
             except FileNotFoundError:
-                logger.warning("Prompt file not found for %s at %s. Falling back to default.", name, file_path)
+                logger.warning(
+                    "Prompt file not found for %s at %s. Falling back to default.",
+                    name,
+                    file_path,
+                )
             except Exception as e:
                 logger.error("Error reading prompt file for %s: %s", name, e)
 
@@ -91,7 +98,11 @@ class PromptManager:
                 if doc and "text" in doc:
                     return doc["text"]
         except Exception as e:
-            logger.warning("Failed to load prompt %s from MongoDB: %s. Using file/cache fallback.", name, e)
+            logger.warning(
+                "Failed to load prompt %s from MongoDB: %s. Using file/cache fallback.",
+                name,
+                e,
+            )
 
         # 3. Cache or Local File Fallback
         return self.get_prompt_sync(name)
@@ -102,9 +113,7 @@ class PromptManager:
             db = get_mongodb_db()
             if db is not None:
                 await db["prompts"].replace_one(
-                    {"_id": name},
-                    {"_id": name, "text": text},
-                    upsert=True
+                    {"_id": name}, {"_id": name, "text": text}, upsert=True
                 )
                 logger.info("Prompt %s successfully updated in MongoDB.", name)
             else:
@@ -150,7 +159,9 @@ class PromptManager:
         for name in PROMPT_FILE_MAP.keys():
             # Check if overridden in MongoDB
             is_overridden = name in db_prompts
-            current_text = db_prompts[name] if is_overridden else self.get_prompt_sync(name)
+            current_text = (
+                db_prompts[name] if is_overridden else self.get_prompt_sync(name)
+            )
             results[name] = {
                 "name": name,
                 "text": current_text,
@@ -159,11 +170,15 @@ class PromptManager:
             }
         return results
 
+
 # Singleton instance of prompt manager
 prompt_manager = PromptManager()
 
+
 def make_instruction_provider(agent_name: str):
     """Creates a callable InstructionProvider for LlmAgent."""
+
     async def instruction_provider(ctx: ReadonlyContext) -> str:
         return await prompt_manager.get_prompt(agent_name)
+
     return instruction_provider

@@ -16,9 +16,11 @@ from fastapi import APIRouter, HTTPException, status
 from app.config import get_settings
 from app.core.firebase_init import is_firebase_initialized
 from app.core.mongodb import get_mongodb_db
-from app.core.security import create_access_token, hash_password, verify_password
+from app.core.security import (create_access_token, hash_password,
+                               verify_password)
 from app.dependencies import CurrentUser
-from app.schemas import AuthResponse, LoginRequest, RegisterRequest, UserResponse
+from app.schemas import (AuthResponse, LoginRequest, RegisterRequest,
+                         UserResponse)
 
 logger = logging.getLogger(__name__)
 
@@ -125,13 +127,15 @@ async def _local_login(request: LoginRequest) -> AuthResponse:
         )
 
     user_id = user.get("id") or user.get("_id")
-    token = create_access_token({
-        "sub": user_id,
-        "email": user["email"],
-        "name": user["name"],
-        "role": user["role"],
-        "patient_id": user.get("patient_id", ""),
-    })
+    token = create_access_token(
+        {
+            "sub": user_id,
+            "email": user["email"],
+            "name": user["name"],
+            "role": user["role"],
+            "patient_id": user.get("patient_id", ""),
+        }
+    )
 
     return AuthResponse(
         access_token=token,
@@ -165,33 +169,49 @@ async def _local_register(request: RegisterRequest) -> AuthResponse:
         )
 
     user_id = f"local-{uuid.uuid4().hex[:8]}"
-    role_str = request.role.value if hasattr(request.role, 'value') else request.role
+    role_str = request.role.value if hasattr(request.role, "value") else request.role
     patient_id = ""
 
     if role_str == "patient":
         patient_id = f"P{uuid.uuid4().hex[:6].upper()}"
         # Save a patient document in the patients collection in MongoDB
         if db is not None:
-            await db["patients"].insert_one({
-                "_id": patient_id,
-                "name": request.name,
-                "age": 30,  # Default age
-                "gender": "Male",  # Default gender
-                "phone": request.phone,
-                "created_at": datetime.now(timezone.utc).isoformat(),
-                "is_active": True,
-            })
-        
+            await db["patients"].insert_one(
+                {
+                    "_id": patient_id,
+                    "name": request.name,
+                    "age": 30,  # Default age
+                    "gender": "Male",  # Default gender
+                    "phone": request.phone,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                    "is_active": True,
+                }
+            )
+
         # Append to CSV
         try:
             import csv
             import os
+
             settings = get_settings()
             csv_path = os.path.join(settings.datasets_path, "patients.csv")
             if os.path.exists(csv_path):
                 with open(csv_path, "a", newline="", encoding="utf-8") as f:
                     writer = csv.writer(f)
-                    writer.writerow([patient_id, request.name, 30, "Male", "O+", "V001", "", request.phone, "", "True"])
+                    writer.writerow(
+                        [
+                            patient_id,
+                            request.name,
+                            30,
+                            "Male",
+                            "O+",
+                            "V001",
+                            "",
+                            request.phone,
+                            "",
+                            "True",
+                        ]
+                    )
         except Exception as csv_err:
             logger.error("Error appending to patients.csv: %s", csv_err)
 
@@ -213,13 +233,15 @@ async def _local_register(request: RegisterRequest) -> AuthResponse:
 
     DEMO_USERS[request.email] = new_user
 
-    token = create_access_token({
-        "sub": user_id,
-        "email": request.email,
-        "name": request.name,
-        "role": new_user["role"],
-        "patient_id": patient_id,
-    })
+    token = create_access_token(
+        {
+            "sub": user_id,
+            "email": request.email,
+            "name": request.name,
+            "role": new_user["role"],
+            "patient_id": patient_id,
+        }
+    )
 
     return AuthResponse(
         access_token=token,
@@ -266,15 +288,21 @@ async def _firebase_login(request: LoginRequest) -> AuthResponse:
                 }
                 await db["users"].insert_one(user_data)
         else:
-            user_data = {"email": decoded.get("email", ""), "name": decoded.get("name", "User"), "role": "doctor"}
+            user_data = {
+                "email": decoded.get("email", ""),
+                "name": decoded.get("name", "User"),
+                "role": "doctor",
+            }
 
         # Create our own JWT for API auth
-        token = create_access_token({
-            "sub": uid,
-            "email": user_data.get("email", ""),
-            "name": user_data.get("name", "User"),
-            "role": user_data.get("role", "doctor"),
-        })
+        token = create_access_token(
+            {
+                "sub": uid,
+                "email": user_data.get("email", ""),
+                "name": user_data.get("name", "User"),
+                "role": user_data.get("role", "doctor"),
+            }
+        )
 
         return AuthResponse(
             access_token=token,
@@ -307,22 +335,34 @@ async def _firebase_register(request: RegisterRequest) -> AuthResponse:
         # Store in MongoDB
         db = get_mongodb_db()
         if db is not None:
-            await db["users"].insert_one({
-                "_id": firebase_user.uid,
+            await db["users"].insert_one(
+                {
+                    "_id": firebase_user.uid,
+                    "email": request.email,
+                    "name": request.name,
+                    "role": (
+                        request.role.value
+                        if hasattr(request.role, "value")
+                        else request.role
+                    ),
+                    "phone": request.phone,
+                    "firebase_uid": firebase_user.uid,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                }
+            )
+
+        token = create_access_token(
+            {
+                "sub": firebase_user.uid,
                 "email": request.email,
                 "name": request.name,
-                "role": request.role.value if hasattr(request.role, 'value') else request.role,
-                "phone": request.phone,
-                "firebase_uid": firebase_user.uid,
-                "created_at": datetime.now(timezone.utc).isoformat(),
-            })
-
-        token = create_access_token({
-            "sub": firebase_user.uid,
-            "email": request.email,
-            "name": request.name,
-            "role": request.role.value if hasattr(request.role, 'value') else request.role,
-        })
+                "role": (
+                    request.role.value
+                    if hasattr(request.role, "value")
+                    else request.role
+                ),
+            }
+        )
 
         return AuthResponse(
             access_token=token,

@@ -7,7 +7,9 @@ Singleton initialization of Motor MongoDB client.
 from __future__ import annotations
 
 import logging
+
 from motor.motor_asyncio import AsyncIOMotorClient
+
 from app.config import get_settings
 
 logger = logging.getLogger(__name__)
@@ -44,7 +46,10 @@ def init_mongodb() -> None:
         # Connect to MongoDB using Motor
         _mongo_client = AsyncIOMotorClient(uri)
         _mongo_db = _mongo_client[settings.mongodb_db_name]
-        logger.info("MongoDB Async client initialized successfully (Database: %s).", settings.mongodb_db_name)
+        logger.info(
+            "MongoDB Async client initialized successfully (Database: %s).",
+            settings.mongodb_db_name,
+        )
     except Exception as e:
         logger.error("Failed to initialize MongoDB: %s", e)
 

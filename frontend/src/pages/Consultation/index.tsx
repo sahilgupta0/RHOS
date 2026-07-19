@@ -281,10 +281,20 @@ export default function ConsultationPage() {
     };
 
 
+    const interval = setInterval(advanceStage, 1000);
+
     try {
       console.log("sending this data : ", activeConsultation.id)
       const response = await consultationApi.submit(activeConsultation.id);
-
+      clearInterval(interval);
+      setPipelineStatus({
+        conversation: "completed",
+        history: "completed",
+        triage: "completed",
+        medicine: "completed",
+        doctor: "completed",
+        followup: "completed",
+      });
 
       setMessages((prev) => [
         ...prev,
@@ -298,6 +308,7 @@ export default function ConsultationPage() {
       ]);
       queryClient.invalidateQueries({ queryKey: ["consultation", id] });
     } catch (err: any) {
+      clearInterval(interval);
       console.error(err);
       setError(err.response?.data?.detail || "Failed to run the clinical pipeline. Please try again.");
       setPipelineStatus({
@@ -318,6 +329,7 @@ export default function ConsultationPage() {
         },
       ]);
     } finally {
+      clearInterval(interval);
       setIsSubmitting(false);
     }
   };

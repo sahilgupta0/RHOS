@@ -12,12 +12,12 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-
 # ── Enums ──────────────────────────────────────────────────────────────────────
 
 
 class TriagePriority(str, Enum):
     """Triage priority classification."""
+
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
@@ -25,6 +25,7 @@ class TriagePriority(str, Enum):
 
 class Gender(str, Enum):
     """Patient gender."""
+
     MALE = "Male"
     FEMALE = "Female"
     OTHER = "Other"
@@ -32,6 +33,7 @@ class Gender(str, Enum):
 
 class BloodGroup(str, Enum):
     """Blood group types."""
+
     A_POSITIVE = "A+"
     A_NEGATIVE = "A-"
     B_POSITIVE = "B+"
@@ -44,6 +46,7 @@ class BloodGroup(str, Enum):
 
 class VisitType(str, Enum):
     """Type of patient visit."""
+
     WALK_IN = "walk-in"
     APPOINTMENT = "appointment"
     FOLLOW_UP = "follow-up"
@@ -53,6 +56,7 @@ class VisitType(str, Enum):
 
 class AppointmentStatus(str, Enum):
     """Appointment status."""
+
     SCHEDULED = "scheduled"
     COMPLETED = "completed"
     CANCELLED = "cancelled"
@@ -61,6 +65,7 @@ class AppointmentStatus(str, Enum):
 
 class ReferralUrgency(str, Enum):
     """Referral urgency level."""
+
     ROUTINE = "routine"
     URGENT = "urgent"
     EMERGENCY = "emergency"
@@ -68,6 +73,7 @@ class ReferralUrgency(str, Enum):
 
 class AllergySeverity(str, Enum):
     """Allergy severity level."""
+
     MILD = "mild"
     MODERATE = "moderate"
     SEVERE = "severe"
@@ -75,6 +81,7 @@ class AllergySeverity(str, Enum):
 
 class MedicalConditionStatus(str, Enum):
     """Status of a medical condition."""
+
     ACTIVE = "active"
     RESOLVED = "resolved"
     CHRONIC = "chronic"
@@ -83,6 +90,7 @@ class MedicalConditionStatus(str, Enum):
 
 class UserRole(str, Enum):
     """User roles in the system."""
+
     DOCTOR = "doctor"
     NURSE = "nurse"
     ASHA_WORKER = "asha_worker"
@@ -95,12 +103,14 @@ class UserRole(str, Enum):
 
 class TimestampMixin(BaseModel):
     """Mixin for created_at and updated_at timestamps."""
+
     created_at: datetime = Field(default_factory=lambda: datetime.now())
     updated_at: datetime = Field(default_factory=lambda: datetime.now())
 
 
 class MongoDocument(BaseModel):
     """Base model for MongoDB documents with ID."""
+
     id: str = ""
 
     def to_mongo(self) -> dict[str, Any]:

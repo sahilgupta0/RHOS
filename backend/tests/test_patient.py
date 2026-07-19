@@ -1,5 +1,6 @@
 import pytest
 
+
 def test_list_patients(client, auth_header):
     """Test retrieving list of patients."""
     response = client.get("/patients", headers=auth_header)
@@ -37,12 +38,7 @@ def test_create_patient(client, auth_header, mock_db_setup):
         "blood_group": "A+",
         "village_id": "v002",
         "asha_worker_id": "asha-002",
-        "vitals": {
-            "bp_sys": 120,
-            "bp_dia": 80,
-            "pulse": 72,
-            "temperature": 98.6
-        }
+        "vitals": {"bp_sys": 120, "bp_dia": 80, "pulse": 72, "temperature": 98.6},
     }
     response = client.post("/patient", json=payload, headers=auth_header)
     assert response.status_code == 201

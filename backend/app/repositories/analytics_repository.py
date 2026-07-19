@@ -52,16 +52,13 @@ class AnalyticsRepository:
             high_priority = await self.db["consultations"].count_documents(
                 {
                     "triage_priority": "HIGH",
-                    "created_at": {"$gte": today_start.isoformat()}
+                    "created_at": {"$gte": today_start.isoformat()},
                 }
             )
 
             # Count pending follow-ups
             follow_ups = await self.db["consultations"].count_documents(
-                {
-                    "status": "active",
-                    "follow_up_date": {"$ne": None}
-                }
+                {"status": "active", "follow_up_date": {"$ne": None}}
             )
 
             return {
@@ -89,7 +86,7 @@ class AnalyticsRepository:
                 {"$limit": 500},
                 {"$group": {"_id": "$condition", "count": {"$sum": 1}}},
                 {"$sort": {"count": -1}},
-                {"$limit": 10}
+                {"$limit": 10},
             ]
             cursor = self.db["medical_history"].aggregate(pipeline)
             conditions = []
@@ -100,7 +97,11 @@ class AnalyticsRepository:
 
             total = sum(c[1] for c in conditions) or 1
             return [
-                {"condition": cond, "count": count, "percentage": round(count / total * 100, 1)}
+                {
+                    "condition": cond,
+                    "count": count,
+                    "percentage": round(count / total * 100, 1),
+                }
                 for cond, count in conditions
             ]
         except Exception as e:
@@ -174,33 +175,49 @@ class AnalyticsRepository:
     @staticmethod
     def _mock_disease_distribution() -> list[dict[str, Any]]:
         diseases = [
-            ("Hypertension", 45, 15.0), ("Type 2 Diabetes", 38, 12.7),
-            ("Acute Respiratory Infection", 32, 10.7), ("Malaria", 28, 9.3),
-            ("Dengue Fever", 22, 7.3), ("Tuberculosis", 18, 6.0),
-            ("Anemia", 16, 5.3), ("Gastroenteritis", 14, 4.7),
-            ("Pneumonia", 12, 4.0), ("Skin Infections", 10, 3.3),
+            ("Hypertension", 45, 15.0),
+            ("Type 2 Diabetes", 38, 12.7),
+            ("Acute Respiratory Infection", 32, 10.7),
+            ("Malaria", 28, 9.3),
+            ("Dengue Fever", 22, 7.3),
+            ("Tuberculosis", 18, 6.0),
+            ("Anemia", 16, 5.3),
+            ("Gastroenteritis", 14, 4.7),
+            ("Pneumonia", 12, 4.0),
+            ("Skin Infections", 10, 3.3),
         ]
         return [{"condition": c, "count": n, "percentage": p} for c, n, p in diseases]
 
     @staticmethod
     def _mock_patient_trends(days: int = 14) -> list[dict[str, Any]]:
         import random
+
         trends = []
         for i in range(days):
             d = (datetime.now() - timedelta(days=days - i - 1)).strftime("%Y-%m-%d")
             count = random.randint(15, 35)
-            trends.append({"date": d, "count": count, "high_priority": random.randint(0, 5)})
+            trends.append(
+                {"date": d, "count": count, "high_priority": random.randint(0, 5)}
+            )
         return trends
 
     @staticmethod
     def _mock_village_stats() -> list[dict[str, Any]]:
         villages = [
-            ("V001", "Khandela", 45, 3, 1), ("V002", "Ringus", 38, 2, 0),
-            ("V003", "Neem Ka Thana", 32, 4, 2), ("V004", "Sri Madhopur", 28, 1, 0),
-            ("V005", "Chomu", 42, 5, 1), ("V006", "Phulera", 22, 2, 1),
+            ("V001", "Khandela", 45, 3, 1),
+            ("V002", "Ringus", 38, 2, 0),
+            ("V003", "Neem Ka Thana", 32, 4, 2),
+            ("V004", "Sri Madhopur", 28, 1, 0),
+            ("V005", "Chomu", 42, 5, 1),
+            ("V006", "Phulera", 22, 2, 1),
         ]
         return [
-            {"village_id": v[0], "village_name": v[1], "total_patients": v[2],
-             "active_cases": v[3], "high_priority": v[4]}
+            {
+                "village_id": v[0],
+                "village_name": v[1],
+                "total_patients": v[2],
+                "active_cases": v[3],
+                "high_priority": v[4],
+            }
             for v in villages
         ]

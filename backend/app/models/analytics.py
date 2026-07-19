@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 
 class DashboardStats(BaseModel):
     """Dashboard summary statistics."""
+
     total_patients: int = 0
     patients_today: int = 0
     patients_this_week: int = 0
@@ -23,6 +24,7 @@ class DashboardStats(BaseModel):
 
 class DiseaseDistribution(BaseModel):
     """Disease distribution data point."""
+
     condition: str
     count: int
     percentage: float = 0.0
@@ -30,6 +32,7 @@ class DiseaseDistribution(BaseModel):
 
 class PatientTrend(BaseModel):
     """Daily patient trend data point."""
+
     date: str
     count: int
     high_priority: int = 0
@@ -37,6 +40,7 @@ class PatientTrend(BaseModel):
 
 class VillageStats(BaseModel):
     """Village-level statistics."""
+
     village_id: str
     village_name: str
     total_patients: int = 0
@@ -47,6 +51,7 @@ class VillageStats(BaseModel):
 
 class MedicineUsage(BaseModel):
     """Medicine usage statistics."""
+
     medicine_name: str
     generic_name: str = ""
     times_prescribed: int = 0
@@ -55,6 +60,7 @@ class MedicineUsage(BaseModel):
 
 class AnalyticsResponse(BaseModel):
     """Complete analytics response."""
+
     dashboard_stats: DashboardStats = Field(default_factory=DashboardStats)
     disease_distribution: list[DiseaseDistribution] = Field(default_factory=list)
     patient_trends: list[PatientTrend] = Field(default_factory=list)

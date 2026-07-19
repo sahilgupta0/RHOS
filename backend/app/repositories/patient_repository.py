@@ -48,9 +48,7 @@ class MedicalHistoryRepository(BaseRepository):
     def __init__(self):
         super().__init__("medical_history")
 
-    async def get_by_patient(
-        self, patient_id: str
-    ) -> list[dict[str, Any]]:
+    async def get_by_patient(self, patient_id: str) -> list[dict[str, Any]]:
         """Get all medical history for a patient."""
         return await self.list_all(
             filters=[("patient_id", "==", patient_id)],

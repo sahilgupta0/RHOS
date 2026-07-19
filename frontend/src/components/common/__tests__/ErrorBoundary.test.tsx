@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import ErrorBoundary from "../ErrorBoundary";
-import { vi } from "vitest";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 
 // A component that throws an error on demand
 function BuggyComponent({ shouldThrow }: { shouldThrow: boolean }) {

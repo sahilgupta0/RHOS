@@ -1,6 +1,7 @@
 import os
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 # ── Set Test Environment Variables ──
 os.environ["JWT_SECRET_KEY"] = "mock-secret-key-at-least-32-chars-long-123456789"
@@ -9,6 +10,7 @@ os.environ["MONGODB_URI"] = "mongodb://localhost:27017"
 os.environ["MONGODB_DB_NAME"] = "rhos_test"
 
 # ── Mock Classes ──
+
 
 class MockAsyncCursor:
     def __init__(self, data):
@@ -36,6 +38,7 @@ class MockAsyncCursor:
         self.index += 1
         return val
 
+
 class MockCollection:
     def __init__(self, name, db_store):
         self.name = name
@@ -43,6 +46,7 @@ class MockCollection:
 
     async def find_one(self, filter, *args, **kwargs):
         import copy
+
         docs = [copy.deepcopy(d) for d in self.db_store.get(self.name, {}).values()]
         if filter:
             for d in docs:
@@ -59,9 +63,11 @@ class MockCollection:
 
     async def insert_one(self, document, *args, **kwargs):
         import copy
+
         doc_id = document.get("_id")
         if not doc_id:
             import uuid
+
             doc_id = uuid.uuid4().hex
             document["_id"] = doc_id
         if self.name not in self.db_store:
@@ -71,6 +77,7 @@ class MockCollection:
 
     async def update_one(self, filter, update, *args, **kwargs):
         import copy
+
         doc_id = filter.get("_id")
         if not doc_id:
             existing = await self.find_one(filter)
@@ -83,17 +90,20 @@ class MockCollection:
 
     async def replace_one(self, filter, replacement, upsert=False, *args, **kwargs):
         import copy
+
         doc_id = filter.get("_id")
         if not doc_id:
             existing = await self.find_one(filter)
             if existing:
                 doc_id = existing["_id"]
             elif upsert:
-                doc_id = replacement.get("_id") or replacement.get("id") or "generated-id"
-        
+                doc_id = (
+                    replacement.get("_id") or replacement.get("id") or "generated-id"
+                )
+
         if self.name not in self.db_store:
             self.db_store[self.name] = {}
-            
+
         if doc_id:
             replacement["_id"] = doc_id
             self.db_store[self.name][doc_id] = copy.deepcopy(replacement)
@@ -111,6 +121,7 @@ class MockCollection:
 
     def find(self, filter=None, *args, **kwargs):
         import copy
+
         docs = [copy.deepcopy(d) for d in self.db_store.get(self.name, {}).values()]
         if filter:
             filtered = []
@@ -128,6 +139,7 @@ class MockCollection:
 
     async def count_documents(self, filter=None, *args, **kwargs):
         import copy
+
         docs = [copy.deepcopy(d) for d in self.db_store.get(self.name, {}).values()]
         if filter:
             filtered = []
@@ -143,6 +155,7 @@ class MockCollection:
             return len(filtered)
         return len(docs)
 
+
 class MockDatabase:
     def __init__(self, db_store):
         self.db_store = db_store
@@ -152,6 +165,7 @@ class MockDatabase:
         if name not in self.collections:
             self.collections[name] = MockCollection(name, self.db_store)
         return self.collections[name]
+
 
 # ── Setup Global Mock Store ──
 
@@ -210,11 +224,12 @@ GLOBAL_DB_STORE = {
             "chief_complaint": "Headache and mild fever",
             "summary": "Hypertension patient with fever.",
         }
-    }
+    },
 }
 
 # ── Monkeypatch app.core.mongodb BEFORE importing app.main ──
 import app.core.mongodb as mongodb_module
+
 mock_db = MockDatabase(GLOBAL_DB_STORE)
 mongodb_module._mongo_db = mock_db
 mongodb_module._mongo_client = MagicMock()
@@ -223,34 +238,47 @@ mongodb_module.close_mongodb = lambda: None
 
 # ── Mock Gemini AI Module BEFORE importing app.main ──
 import app.services.gemini as gemini_module
+
 mock_model = MagicMock()
 mock_response = MagicMock()
-mock_response.text = '{"safety": "safe", "interactions": "none", "recommendations": "safe to proceed"}'
+mock_response.text = (
+    '{"safety": "safe", "interactions": "none", "recommendations": "safe to proceed"}'
+)
 mock_model.generate_content.return_value = mock_response
 gemini_module._model = mock_model
+
+
 # Also mock generate_text and analyze_image
 async def mock_generate_text(*args, **kwargs):
     return '{"priority": "MEDIUM", "reasoning": "mocked reasoning", "confidence": 0.9, "recommendations": []}'
+
+
 async def mock_analyze_image(*args, **kwargs):
     return "Mocked visible image findings."
+
+
 gemini_module.generate_text = mock_generate_text
 gemini_module.analyze_image = mock_analyze_image
 
+from fastapi.testclient import TestClient
+
+from app.core.security import create_access_token
 # Now import fastapi app safely
 from app.main import app as fastapi_app
-from app.core.security import create_access_token
-from fastapi.testclient import TestClient
+
 
 @pytest.fixture(scope="session", autouse=True)
 def mock_db_setup():
     """Globally mock MongoDB database using in-memory store."""
     yield GLOBAL_DB_STORE
 
+
 @pytest.fixture
 def client():
     """FastAPI TestClient fixture."""
     with TestClient(fastapi_app) as test_client:
         yield test_client
+
 
 @pytest.fixture
 def auth_header():

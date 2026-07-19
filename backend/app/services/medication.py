@@ -39,12 +39,44 @@ KNOWN_INTERACTIONS: dict[tuple[str, str], dict[str, str]] = {
 
 # Common generic alternatives
 GENERIC_ALTERNATIVES: dict[str, list[dict[str, str]]] = {
-    "paracetamol": [{"generic": "Acetaminophen", "brand": "Crocin/Calpol", "note": "Same active ingredient"}],
-    "amoxicillin": [{"generic": "Amoxicillin", "brand": "Mox/Novamox", "note": "Generic widely available"}],
-    "metformin": [{"generic": "Metformin HCl", "brand": "Glycomet/Glucophage", "note": "First-line T2DM"}],
-    "amlodipine": [{"generic": "Amlodipine besylate", "brand": "Amlopress/Amlip", "note": "Calcium channel blocker"}],
-    "omeprazole": [{"generic": "Omeprazole", "brand": "Omez", "note": "PPI, generic widely available"}],
-    "atorvastatin": [{"generic": "Atorvastatin calcium", "brand": "Atorva/Lipitor", "note": "Statin"}],
+    "paracetamol": [
+        {
+            "generic": "Acetaminophen",
+            "brand": "Crocin/Calpol",
+            "note": "Same active ingredient",
+        }
+    ],
+    "amoxicillin": [
+        {
+            "generic": "Amoxicillin",
+            "brand": "Mox/Novamox",
+            "note": "Generic widely available",
+        }
+    ],
+    "metformin": [
+        {
+            "generic": "Metformin HCl",
+            "brand": "Glycomet/Glucophage",
+            "note": "First-line T2DM",
+        }
+    ],
+    "amlodipine": [
+        {
+            "generic": "Amlodipine besylate",
+            "brand": "Amlopress/Amlip",
+            "note": "Calcium channel blocker",
+        }
+    ],
+    "omeprazole": [
+        {
+            "generic": "Omeprazole",
+            "brand": "Omez",
+            "note": "PPI, generic widely available",
+        }
+    ],
+    "atorvastatin": [
+        {"generic": "Atorvastatin calcium", "brand": "Atorva/Lipitor", "note": "Statin"}
+    ],
 }
 
 
@@ -72,15 +104,17 @@ async def check_drug_interactions(
 
     # Check known interactions
     for i, med1 in enumerate(meds_lower):
-        for med2 in meds_lower[i + 1:]:
+        for med2 in meds_lower[i + 1 :]:
             for (d1, d2), info in KNOWN_INTERACTIONS.items():
                 if (d1 in med1 or d1 in med2) and (d2 in med1 or d2 in med2):
-                    result["interactions"].append({
-                        "drug1": medications[i],
-                        "drug2": medications[meds_lower.index(med2)],
-                        "severity": info["severity"],
-                        "description": info["description"],
-                    })
+                    result["interactions"].append(
+                        {
+                            "drug1": medications[i],
+                            "drug2": medications[meds_lower.index(med2)],
+                            "severity": info["severity"],
+                            "description": info["description"],
+                        }
+                    )
                     if info["severity"] == "HIGH":
                         result["safe_to_prescribe"] = False
 
@@ -88,11 +122,13 @@ async def check_drug_interactions(
     for med in meds_lower:
         for allergen in allergies_lower:
             if allergen in med or med in allergen:
-                result["allergy_warnings"].append({
-                    "medication": med,
-                    "allergen": allergen,
-                    "risk_level": "HIGH",
-                })
+                result["allergy_warnings"].append(
+                    {
+                        "medication": med,
+                        "allergen": allergen,
+                        "risk_level": "HIGH",
+                    }
+                )
                 result["safe_to_prescribe"] = False
 
     # Find generic alternatives

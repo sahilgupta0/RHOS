@@ -44,7 +44,11 @@ def init_firebase() -> None:
         cred = credentials.Certificate(str(cred_path))
         _firebase_app = firebase_admin.initialize_app(
             cred,
-            {"storageBucket": settings.firebase_storage_bucket} if settings.firebase_storage_bucket else {},
+            (
+                {"storageBucket": settings.firebase_storage_bucket}
+                if settings.firebase_storage_bucket
+                else {}
+            ),
         )
         logger.info("Firebase Admin SDK initialized successfully.")
     except Exception as e:
@@ -56,7 +60,9 @@ def get_firestore_client():
     global _firestore_client
     if _firestore_client is None:
         if _firebase_app is None:
-            logger.warning("Firebase not initialized. Returning None for Firestore client.")
+            logger.warning(
+                "Firebase not initialized. Returning None for Firestore client."
+            )
             return None
         _firestore_client = firestore.client()
     return _firestore_client
@@ -67,7 +73,9 @@ def get_storage_bucket():
     global _storage_bucket
     if _storage_bucket is None:
         if _firebase_app is None:
-            logger.warning("Firebase not initialized. Returning None for Storage bucket.")
+            logger.warning(
+                "Firebase not initialized. Returning None for Storage bucket."
+            )
             return None
         _storage_bucket = storage.bucket()
     return _storage_bucket

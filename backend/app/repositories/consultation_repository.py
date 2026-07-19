@@ -74,9 +74,7 @@ class TriageLogRepository(BaseRepository):
     def __init__(self):
         super().__init__("triage_logs")
 
-    async def get_by_consultation(
-        self, consultation_id: str
-    ) -> list[dict[str, Any]]:
+    async def get_by_consultation(self, consultation_id: str) -> list[dict[str, Any]]:
         """Get triage logs for a consultation."""
         return await self.list_all(
             filters=[("consultation_id", "==", consultation_id)],
@@ -89,9 +87,7 @@ class DoctorNoteRepository(BaseRepository):
     def __init__(self):
         super().__init__("doctor_notes")
 
-    async def get_by_consultation(
-        self, consultation_id: str
-    ) -> dict[str, Any] | None:
+    async def get_by_consultation(self, consultation_id: str) -> dict[str, Any] | None:
         """Get doctor note for a consultation."""
         results = await self.list_all(
             filters=[("consultation_id", "==", consultation_id)],

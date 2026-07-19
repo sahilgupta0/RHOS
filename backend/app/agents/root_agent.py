@@ -13,11 +13,11 @@ import logging
 from google.adk.agents import SequentialAgent
 
 from app.agents.conversation_agent import conversation_agent
-from app.agents.history_agent import history_agent
-from app.agents.triage_agent import triage_agent
-from app.agents.medicine_agent import medicine_agent
 from app.agents.doctor_agent import doctor_agent
 from app.agents.followup_agent import followup_agent
+from app.agents.history_agent import history_agent
+from app.agents.medicine_agent import medicine_agent
+from app.agents.triage_agent import triage_agent
 
 logger = logging.getLogger(__name__)
 

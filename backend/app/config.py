@@ -69,7 +69,9 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         """Parse CORS origins from comma-separated string."""
-        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+        return [
+            origin.strip() for origin in self.cors_origins.split(",") if origin.strip()
+        ]
 
     @property
     def is_firebase_configured(self) -> bool:
@@ -96,7 +98,9 @@ def get_settings() -> Settings:
     global _settings
     if _settings is None:
         import os
+
         from app.core.secrets_manager import secrets_provider
+
         fetched = secrets_provider.fetch_secrets()
         if fetched:
             for k, v in fetched.items():
