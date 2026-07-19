@@ -266,21 +266,6 @@ export default function ConsultationPage() {
     setReadyToSubmit(false);
     setError(null);
 
-    // Animate each pipeline stage sequentially
-    const allStages = ["conversation", "history", "triage", "medicine", "doctor", "followup"];
-    let stageIdx = 0;
-
-    const advanceStage = () => {
-      setPipelineStatus((prev) => {
-        const next = { ...prev };
-        if (stageIdx > 0) next[allStages[stageIdx - 1]] = "completed";
-        if (stageIdx < allStages.length) next[allStages[stageIdx]] = "active";
-        return next;
-      });
-      stageIdx++;
-    };
-
-
     try {
       console.log("sending this data : ", activeConsultation.id)
       const response = await consultationApi.submit(activeConsultation.id);
