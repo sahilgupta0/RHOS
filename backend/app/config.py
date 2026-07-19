@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     """Application settings loaded from .env file."""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(".env", "backend/.env"),
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
@@ -35,7 +35,7 @@ class Settings(BaseSettings):
 
     # --- Authentication ---
     auth_mode: Literal["firebase", "local"] = "local"
-    jwt_secret_key: str = "dev-secret-key-change-in-production"
+    jwt_secret_key: str = Field(..., description="JWT Secret Key")
     jwt_algorithm: str = "HS256"
     jwt_expiration_minutes: int = 1440  # 24 hours
 
