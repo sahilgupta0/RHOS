@@ -8,8 +8,8 @@ os.environ["AUTH_MODE"] = "local"
 os.environ["MONGODB_URI"] = "mongodb://localhost:27017"
 os.environ["MONGODB_DB_NAME"] = "rhos_test"
 
-import app.core.mongodb
-from app.main import app
+import app.core.mongodb as mongodb_module
+from app.main import app as fastapi_app
 from app.core.security import create_access_token
 from fastapi.testclient import TestClient
 
@@ -47,8 +47,19 @@ class MockCollection:
         self.db_store = db_store
 
     async def find_one(self, filter, *args, **kwargs):
-        doc_id = filter.get("_id")
-        return self.db_store.get(self.name, {}).get(doc_id)
+        docs = list(self.db_store.get(self.name, {}).values())
+        if filter:
+            for d in docs:
+                match = True
+                for k, v in filter.items():
+                    if k == "_id" and d.get("_id") != v:
+                        match = False
+                    elif k != "_id" and d.get(k) != v:
+                        match = False
+                if match:
+                    return d
+            return None
+        return docs[0] if docs else None
 
     async def insert_one(self, document, *args, **kwargs):
         doc_id = document.get("_id")
@@ -63,13 +74,38 @@ class MockCollection:
 
     async def update_one(self, filter, update, *args, **kwargs):
         doc_id = filter.get("_id")
+        if not doc_id:
+            existing = await self.find_one(filter)
+            if existing:
+                doc_id = existing["_id"]
         if self.name in self.db_store and doc_id in self.db_store[self.name]:
             set_data = update.get("$set", {})
             self.db_store[self.name][doc_id].update(set_data)
         return None
 
+    async def replace_one(self, filter, replacement, upsert=False, *args, **kwargs):
+        doc_id = filter.get("_id")
+        if not doc_id:
+            existing = await self.find_one(filter)
+            if existing:
+                doc_id = existing["_id"]
+            elif upsert:
+                doc_id = replacement.get("_id") or replacement.get("id") or "generated-id"
+        
+        if self.name not in self.db_store:
+            self.db_store[self.name] = {}
+            
+        if doc_id:
+            replacement["_id"] = doc_id
+            self.db_store[self.name][doc_id] = replacement
+        return None
+
     async def delete_one(self, filter, *args, **kwargs):
         doc_id = filter.get("_id")
+        if not doc_id:
+            existing = await self.find_one(filter)
+            if existing:
+                doc_id = existing["_id"]
         if self.name in self.db_store and doc_id in self.db_store[self.name]:
             del self.db_store[self.name][doc_id]
         return None
@@ -180,15 +216,18 @@ def mock_db_setup():
     }
     
     mock_db = MockDatabase(db_store)
-    app.core.mongodb._mongo_db = mock_db
+    mongodb_module._mongo_db = mock_db
+    mongodb_module._mongo_client = MagicMock()
+    mongodb_module.init_mongodb = lambda: None
+    mongodb_module.close_mongodb = lambda: None
     
     # Mock Gemini AI Model generate_content
-    import app.services.gemini
+    import app.services.gemini as gemini_module
     mock_model = MagicMock()
     mock_response = MagicMock()
     mock_response.text = '{"safety": "safe", "interactions": "none", "recommendations": "safe to proceed"}'
     mock_model.generate_content.return_value = mock_response
-    app.services.gemini._model = mock_model
+    gemini_module._model = mock_model
 
     yield db_store
 
@@ -196,7 +235,7 @@ def mock_db_setup():
 @pytest.fixture
 def client():
     """FastAPI TestClient fixture."""
-    with TestClient(app) as test_client:
+    with TestClient(fastapi_app) as test_client:
         yield test_client
 
 
