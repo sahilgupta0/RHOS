@@ -7,7 +7,7 @@ Business logic for analytics aggregation and dashboard data.
 from __future__ import annotations
 
 import logging
-from typing import Any
+# No typing imports needed
 
 from app.models.analytics import (
     AnalyticsResponse,

@@ -33,7 +33,6 @@ async def upload_file(
 
     try:
         # Generate unique filename
-        ext = filename.rsplit(".", 1)[-1] if "." in filename else ""
         unique_name = f"{uuid.uuid4().hex[:12]}_{filename}"
         storage_path = f"{folder}/{unique_name}"
 

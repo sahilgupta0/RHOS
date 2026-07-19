@@ -43,7 +43,6 @@ async def get_nearest_hospitals(
     Find the nearest hospitals/PHCs to a given coordinate.
     Uses mock spatial search over seeded hospital data.
     """
-    settings = get_settings()
     # In a full production app, you might use the googlemaps client to find nearby places.
     # We will search the database or return mock data.
     try:

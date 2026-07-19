@@ -7,15 +7,12 @@ Classifies patient cases by priority: LOW, MEDIUM, HIGH.
 from __future__ import annotations
 
 import logging
-from pathlib import Path
-
 from google.adk.agents import LlmAgent
 
 from app.config import get_settings
+from app.core.prompt_manager import make_instruction_provider
 
 logger = logging.getLogger(__name__)
-
-from app.core.prompt_manager import make_instruction_provider
 
 triage_agent = LlmAgent(
     name="triage_agent",

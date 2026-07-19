@@ -4,8 +4,6 @@ import json
 import os
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from app.config import get_settings
 from app.core.secrets_manager import SecretsProvider
 

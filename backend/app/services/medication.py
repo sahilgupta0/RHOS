@@ -144,7 +144,7 @@ async def check_drug_interactions(
             for med in meds_lower:
                 if "aspirin" in med:
                     result["warnings"].append(
-                        f"Aspirin is generally not recommended for children under 12 (Reye's syndrome risk)."
+                        "Aspirin is generally not recommended for children under 12 (Reye's syndrome risk)."
                     )
                     result["safe_to_prescribe"] = False
 

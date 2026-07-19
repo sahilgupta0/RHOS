@@ -1,6 +1,4 @@
-import pytest
-
-
+# No setup imports needed
 def test_start_consultation(client, auth_header, mock_db_setup):
     """Test starting a new consultation session."""
     payload = {

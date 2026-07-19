@@ -12,7 +12,7 @@ from typing import Annotated
 from fastapi import Depends, Header, HTTPException, status
 
 from app.config import Settings, get_settings
-from app.core.firebase_init import get_firestore_client, is_firebase_initialized
+from app.core.firebase_init import is_firebase_initialized
 from app.core.security import decode_access_token
 from app.schemas import UserResponse
 

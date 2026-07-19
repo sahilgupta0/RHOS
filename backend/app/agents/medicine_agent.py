@@ -7,15 +7,12 @@ Checks drug interactions, allergy conflicts, and suggests alternatives.
 from __future__ import annotations
 
 import logging
-from pathlib import Path
-
 from google.adk.agents import LlmAgent
 
 from app.config import get_settings
+from app.core.prompt_manager import make_instruction_provider
 
 logger = logging.getLogger(__name__)
-
-from app.core.prompt_manager import make_instruction_provider
 
 medicine_agent = LlmAgent(
     name="medicine_agent",

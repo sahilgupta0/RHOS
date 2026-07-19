@@ -61,7 +61,6 @@ def get_mongodb_client() -> AsyncIOMotorClient | None:
 
 def get_mongodb_db():
     """Get the MongoDB database instance."""
-    global _mongo_db
     if _mongo_db is None:
         init_mongodb()
     return _mongo_db

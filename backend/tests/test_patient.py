@@ -1,6 +1,4 @@
-import pytest
-
-
+# No setup imports needed
 def test_list_patients(client, auth_header):
     """Test retrieving list of patients."""
     response = client.get("/patients", headers=auth_header)

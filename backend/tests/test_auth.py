@@ -1,6 +1,4 @@
-import pytest
-
-
+# No setup imports needed
 def test_login_success(client):
     """Test login with valid demo user credentials."""
     payload = {"email": "doctor@rhos.in", "password": "doctor123"}

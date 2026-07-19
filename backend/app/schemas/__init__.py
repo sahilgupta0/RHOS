@@ -9,10 +9,9 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import Any
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
 
 from app.models.common import (
-    AllergySeverity,
     BloodGroup,
     Gender,
     TriagePriority,

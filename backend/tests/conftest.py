@@ -228,7 +228,7 @@ GLOBAL_DB_STORE = {
 }
 
 # ── Monkeypatch app.core.mongodb BEFORE importing app.main ──
-import app.core.mongodb as mongodb_module
+import app.core.mongodb as mongodb_module  # noqa: E402
 
 mock_db = MockDatabase(GLOBAL_DB_STORE)
 mongodb_module._mongo_db = mock_db
@@ -237,7 +237,7 @@ mongodb_module.init_mongodb = lambda: None
 mongodb_module.close_mongodb = lambda: None
 
 # ── Mock Gemini AI Module BEFORE importing app.main ──
-import app.services.gemini as gemini_module
+import app.services.gemini as gemini_module  # noqa: E402
 
 mock_model = MagicMock()
 mock_response = MagicMock()
@@ -260,12 +260,12 @@ async def mock_analyze_image(*args, **kwargs):
 gemini_module.generate_text = mock_generate_text
 gemini_module.analyze_image = mock_analyze_image
 
-from fastapi.testclient import TestClient
+from fastapi.testclient import TestClient  # noqa: E402
 
-from app.core.security import create_access_token
+from app.core.security import create_access_token  # noqa: E402
 
 # Now import fastapi app safely
-from app.main import app as fastapi_app
+from app.main import app as fastapi_app  # noqa: E402
 
 
 @pytest.fixture(scope="session", autouse=True)

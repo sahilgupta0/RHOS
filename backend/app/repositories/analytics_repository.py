@@ -7,7 +7,6 @@ MongoDB aggregation queries for dashboard analytics.
 from __future__ import annotations
 
 import logging
-from collections import Counter
 from datetime import datetime, timedelta, timezone
 from typing import Any
 

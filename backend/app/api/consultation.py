@@ -499,6 +499,10 @@ async def upload_consultation_image(
 async def run_triage(request: TriageRequest, current_user: CurrentUser):
     """Run triage classification on symptoms."""
     try:
+        schema_format = (
+            '{"priority": "HIGH|MEDIUM|LOW", "reasoning": "...", '
+            '"confidence": 0.0-1.0, "recommendations": [...]}'
+        )
         prompt = f"""Classify the following case by priority (HIGH, MEDIUM, LOW):
 
 Symptoms: {', '.join(request.symptoms)}
@@ -507,11 +511,14 @@ Medical History: {', '.join(request.medical_history)}
 Age: {request.age or 'Unknown'}
 Gender: {request.gender or 'Unknown'}
 
-Respond with JSON: {{"priority": "HIGH|MEDIUM|LOW", "reasoning": "...", "confidence": 0.0-1.0, "recommendations": [...]}}"""
+Respond with JSON: {schema_format}"""
 
         response = await generate_text(
             prompt=prompt,
-            system_instruction="You are a clinical triage assistant. Classify urgency. Always err on higher priority when uncertain.",
+            system_instruction=(
+                "You are a clinical triage assistant. Classify urgency. "
+                "Always err on higher priority when uncertain."
+            ),
             temperature=0.3,
         )
 
@@ -570,7 +577,10 @@ Respond with JSON: {{"summary": "...", "assessment": "...", "plan": "...", "foll
 
         response = await generate_text(
             prompt=prompt,
-            system_instruction="You are a clinical documentation assistant. Generate a concise summary. NEVER diagnose.",
+            system_instruction=(
+                "You are a clinical documentation assistant. "
+                "Generate a concise summary. NEVER diagnose."
+            ),
             temperature=0.5,
         )
 

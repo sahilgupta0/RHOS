@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 from app.core.mongodb import get_mongodb_db
 

@@ -11,10 +11,9 @@ import logging
 from google.adk.agents import LlmAgent
 
 from app.config import get_settings
+from app.core.prompt_manager import make_instruction_provider
 
 logger = logging.getLogger(__name__)
-
-from app.core.prompt_manager import make_instruction_provider
 
 followup_agent = LlmAgent(
     name="followup_agent",

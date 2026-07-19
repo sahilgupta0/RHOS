@@ -13,13 +13,26 @@ logger = logging.getLogger(__name__)
 
 # Default prompts fallback mapping
 DEFAULT_FALLBACKS = {
-    "conversation_agent": "You are a clinical intake assistant. Extract symptoms from the patient conversation as structured JSON.",
-    "doctor_agent": "You are a clinical documentation assistant. Generate a concise clinical summary. NEVER diagnose.",
-    "followup_agent": "You are a clinical follow-up planning assistant for a rural primary health center in India. Generate follow-up plans, monitoring instructions, warning signs, lifestyle recommendations, and ASHA worker tasks.",
+    "conversation_agent": (
+        "You are a clinical intake assistant. Extract symptoms from the "
+        "patient conversation as structured JSON."
+    ),
+    "doctor_agent": (
+        "You are a clinical documentation assistant. Generate a concise "
+        "clinical summary. NEVER diagnose."
+    ),
+    "followup_agent": (
+        "You are a clinical follow-up planning assistant for a rural primary "
+        "health center in India. Generate follow-up plans, monitoring "
+        "instructions, warning signs, lifestyle recommendations, and ASHA worker tasks."
+    ),
     "history_agent": "You are a medical records assistant. Summarize the patient's medical history concisely.",
     "medicine_agent": "You are a clinical pharmacology assistant. Check medications for interactions and safety.",
     "triage_agent": "You are a clinical triage assistant. Classify patient priority as LOW, MEDIUM, or HIGH.",
-    "vision_agent": "You are a medical image description assistant. Describe visible findings objectively. NEVER diagnose.",
+    "vision_agent": (
+        "You are a medical image description assistant. Describe visible "
+        "findings objectively. NEVER diagnose."
+    ),
 }
 
 # Mapping of agent key to default prompt file name under app/prompts/
