@@ -42,6 +42,14 @@ async def lifespan(app: FastAPI):
     # Initialize MongoDB
     init_mongodb()
 
+    # Apply database schema migrations automatically on startup
+    from app.core.migration_runner import migration_runner
+    try:
+        logger.info("Applying pending database migrations on startup...")
+        await migration_runner.run_upgrades()
+    except Exception as e:
+        logger.error("Failed to run database migrations on startup: %s", e)
+
     logger.info("RHOS Backend started successfully.")
     yield
     # Shutdown

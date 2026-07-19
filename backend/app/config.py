@@ -92,8 +92,15 @@ _settings: Settings | None = None
 
 
 def get_settings() -> Settings:
-    """Get or create the singleton Settings instance."""
+    """Get or create the singleton Settings instance with external secrets management overrides."""
     global _settings
     if _settings is None:
+        import os
+        from app.core.secrets_manager import secrets_provider
+        fetched = secrets_provider.fetch_secrets()
+        if fetched:
+            for k, v in fetched.items():
+                os.environ[k.upper()] = str(v)
+                os.environ[k.lower()] = str(v)
         _settings = Settings()
     return _settings
