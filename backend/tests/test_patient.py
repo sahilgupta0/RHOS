@@ -47,3 +47,58 @@ def test_create_patient(client, auth_header, mock_db_setup):
 
     # Check if patient is stored in mock db
     assert data["id"] in mock_db_setup["patients"]
+
+
+def test_update_patient_success(client, auth_header, mock_db_setup):
+    """Test updating an existing patient record."""
+    payload = {"phone": "+91-9999999999", "address": "New Outpost Address"}
+    response = client.put("/patient/p001", json=payload, headers=auth_header)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["phone"] == "+91-9999999999"
+    assert data["address"] == "New Outpost Address"
+    assert mock_db_setup["patients"]["p001"]["phone"] == "+91-9999999999"
+    assert mock_db_setup["patients"]["p001"]["address"] == "New Outpost Address"
+
+
+def test_update_patient_not_found(client, auth_header):
+    """Test updating a non-existent patient record returns 404."""
+    payload = {"phone": "+91-9999999999"}
+    response = client.put("/patient/nonexistent", json=payload, headers=auth_header)
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Patient not found."
+
+
+def test_get_patient_history_success(client, auth_header):
+    """Test retrieving complete medical history for a patient."""
+    response = client.get("/patient/history/p001", headers=auth_header)
+    assert response.status_code == 200
+    data = response.json()
+    assert "patient" in data
+    assert "medical_history" in data
+    assert "vitals" in data
+    assert "allergies" in data
+    assert data["patient"]["id"] == "p001"
+
+
+def test_get_patient_history_not_found(client, auth_header):
+    """Test retrieving history for non-existent patient returns 404."""
+    response = client.get("/patient/history/nonexistent", headers=auth_header)
+    assert response.status_code == 404
+
+
+def test_list_patients_search(client, auth_header):
+    """Test listing patients with search query."""
+    response = client.get("/patients?search=Dinesh", headers=auth_header)
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["patients"]) >= 1
+
+
+def test_list_patients_village_filter(client, auth_header):
+    """Test listing patients filtered by village ID."""
+    response = client.get("/patients?village_id=v001", headers=auth_header)
+    assert response.status_code == 200
+    data = response.json()
+    assert "patients" in data
+

@@ -130,8 +130,18 @@ class MockCollection:
                 for k, v in filter.items():
                     if k == "_id" and d.get("_id") != v:
                         match = False
-                    elif k != "_id" and d.get(k) != v:
-                        match = False
+                    elif k != "_id":
+                        val = d.get(k)
+                        if isinstance(v, dict) and "$regex" in v:
+                            import re
+                            pattern = v["$regex"]
+                            flags = 0
+                            if v.get("$options") == "i":
+                                flags = re.IGNORECASE
+                            if re.search(pattern, str(val), flags) is None:
+                                match = False
+                        elif val != v:
+                            match = False
                 if match:
                     filtered.append(d)
             docs = filtered
@@ -148,8 +158,18 @@ class MockCollection:
                 for k, v in filter.items():
                     if k == "_id" and d.get("_id") != v:
                         match = False
-                    elif k != "_id" and d.get(k) != v:
-                        match = False
+                    elif k != "_id":
+                        val = d.get(k)
+                        if isinstance(v, dict) and "$regex" in v:
+                            import re
+                            pattern = v["$regex"]
+                            flags = 0
+                            if v.get("$options") == "i":
+                                flags = re.IGNORECASE
+                            if re.search(pattern, str(val), flags) is None:
+                                match = False
+                        elif val != v:
+                            match = False
                 if match:
                     filtered.append(d)
             return len(filtered)
