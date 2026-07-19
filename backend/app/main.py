@@ -85,7 +85,7 @@ def create_app() -> FastAPI:
 
 def _register_routes(app: FastAPI) -> None:
     """Register all API route modules."""
-    from app.api import health, auth, patient, consultation, analytics, upload, speech
+    from app.api import health, auth, patient, consultation, analytics, upload, speech, prompts
 
     app.include_router(health.router, tags=["Health"])
     app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
@@ -94,6 +94,7 @@ def _register_routes(app: FastAPI) -> None:
     app.include_router(analytics.router, tags=["Analytics"])
     app.include_router(upload.router, tags=["Upload"])
     app.include_router(speech.router, tags=["Speech"])
+    app.include_router(prompts.router, tags=["Prompts"])
 
 
 # Create the application instance

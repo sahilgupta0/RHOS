@@ -46,6 +46,7 @@ export default function ConsultationPage() {
   const [isClearingChat, setIsClearingChat] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [readyToSubmit, setReadyToSubmit] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [pipelineStatus, setPipelineStatus] = useState<Record<string, string>>({
     conversation: "pending",
     history: "pending",
@@ -130,14 +131,16 @@ export default function ConsultationPage() {
 
   const startNewConsultation = async (patientIdStr: string, complaint: string) => {
     setIsLoading(true);
+    setError(null);
     try {
       const newCons = await consultationApi.start({
         patient_id: patientIdStr,
         chief_complaint: complaint || "General consultation",
       });
       navigate(`/consultation/${newCons.id}`);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to start consultation", err);
+      setError(err.response?.data?.detail || "Failed to start consultation. Please check backend connection.");
     } finally {
       setIsLoading(false);
     }
@@ -157,6 +160,7 @@ export default function ConsultationPage() {
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsLoading(true);
+    setError(null);
     // Only conversation agent is active during chat; others stay pending
     setPipelineStatus({
       conversation: "active",
@@ -198,8 +202,9 @@ export default function ConsultationPage() {
 
       setMessages((prev) => [...prev, agentMsg]);
       queryClient.invalidateQueries({ queryKey: ["consultation", id] });
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setError(err.response?.data?.detail || "Failed to connect to the backend agent pipeline. Please try again.");
       setPipelineStatus({
         conversation: "pending",
         history: "pending",
@@ -226,6 +231,7 @@ export default function ConsultationPage() {
     if (!activeConsultation) return;
     setIsClearingChat(true);
     setShowClearConfirm(false);
+    setError(null);
     try {
       await consultationApi.clearChat(activeConsultation.id);
       setMessages([SYSTEM_NOTICE, {
@@ -245,8 +251,9 @@ export default function ConsultationPage() {
         followup: "pending",
       });
       queryClient.invalidateQueries({ queryKey: ["consultation", id] });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to clear chat", err);
+      setError(err.response?.data?.detail || "Failed to clear chat history.");
     } finally {
       setIsClearingChat(false);
     }
@@ -257,6 +264,7 @@ export default function ConsultationPage() {
 
     setIsSubmitting(true);
     setReadyToSubmit(false);
+    setError(null);
 
     // Animate each pipeline stage sequentially
     const allStages = ["conversation", "history", "triage", "medicine", "doctor", "followup"];
@@ -289,8 +297,9 @@ export default function ConsultationPage() {
         },
       ]);
       queryClient.invalidateQueries({ queryKey: ["consultation", id] });
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setError(err.response?.data?.detail || "Failed to run the clinical pipeline. Please try again.");
       setPipelineStatus({
         conversation: "completed",
         history: "pending",
@@ -319,6 +328,7 @@ export default function ConsultationPage() {
 
     setUploadingImage(true);
     setIsLoading(true);
+    setError(null);
 
     try {
       const res = await consultationApi.uploadImage(activeConsultation.id, file);
@@ -336,8 +346,9 @@ export default function ConsultationPage() {
 
       // Automatically send a followup message to trigger agents on the image findings
       setInput(`Please review the uploaded medical image findings: ${res.findings}`);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setError(err.response?.data?.detail || "Failed to upload and analyze image. Please check backend connection.");
     } finally {
       setUploadingImage(false);
       setIsLoading(false);
@@ -389,6 +400,13 @@ export default function ConsultationPage() {
             Select a patient to begin the AI decision support pipeline
           </p>
         </div>
+
+        {error && (
+          <div className="rounded-2xl border border-rose-200 bg-rose-50/50 p-4 text-sm text-rose-700 dark:border-rose-900/30 dark:bg-rose-950/10 dark:text-rose-400 flex justify-between items-center">
+            <span>{error}</span>
+            <button onClick={() => setError(null)} className="text-rose-500 hover:text-rose-700 font-bold ml-2">✕</button>
+          </div>
+        )}
 
         <div className="rounded-3xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-6 shadow-md space-y-4">
           <div>
@@ -451,6 +469,13 @@ export default function ConsultationPage() {
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-5 space-y-4 scrollbar-thin">
+          {error && (
+            <div className="rounded-xl border border-rose-200 bg-rose-50/50 p-4 text-xs text-rose-700 dark:border-rose-900/30 dark:bg-rose-950/10 dark:text-rose-400 flex justify-between items-center animate-slide-up">
+              <span>{error}</span>
+              <button onClick={() => setError(null)} className="text-rose-500 hover:text-rose-700 font-bold ml-2">✕</button>
+            </div>
+          )}
+
           {messages.map((msg) => (
             <div
               key={msg.id}

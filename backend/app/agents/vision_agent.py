@@ -15,20 +15,12 @@ from app.config import get_settings
 
 logger = logging.getLogger(__name__)
 
-PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "vision.md"
-
-
-def _load_prompt() -> str:
-    try:
-        return PROMPT_PATH.read_text(encoding="utf-8")
-    except FileNotFoundError:
-        return "You are a medical image description assistant. Describe visible findings objectively. NEVER diagnose."
-
+from app.core.prompt_manager import make_instruction_provider
 
 vision_agent = LlmAgent(
     name="vision_agent",
     model=get_settings().gemini_model,
-    instruction=_load_prompt(),
+    instruction=make_instruction_provider("vision_agent"),
     description="Analyzes uploaded medical images and describes visible findings objectively.",
     output_key="vision_output",
 )

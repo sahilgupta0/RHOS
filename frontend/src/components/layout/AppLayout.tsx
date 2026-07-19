@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
+import ErrorBoundary from "../common/ErrorBoundary";
 
 export default function AppLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -17,7 +18,9 @@ export default function AppLayout() {
 
         <main className="flex-1 overflow-y-auto p-6 scrollbar-thin">
           <div className="mx-auto max-w-7xl animate-in">
-            <Outlet />
+            <ErrorBoundary>
+              <Outlet />
+            </ErrorBoundary>
           </div>
         </main>
       </div>

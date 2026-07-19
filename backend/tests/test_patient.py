@@ -32,7 +32,7 @@ def test_create_patient(client, auth_header, mock_db_setup):
     payload = {
         "name": "Ramesh Gupta",
         "age": 52,
-        "gender": "male",
+        "gender": "Male",
         "phone": "+91-9988776655",
         "blood_group": "A+",
         "village_id": "v002",

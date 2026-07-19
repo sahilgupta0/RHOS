@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { analyticsApi } from "../../api";
 import { cn, getTriageColor, getTriageDotColor } from "../../lib/utils";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 import {
   Users,
   AlertTriangle,
@@ -63,11 +64,19 @@ const recentPatients = [
 ];
 
 export default function Dashboard() {
-  const { data: analyticsData } = useQuery({
+  const { data: analyticsData, isLoading, isError } = useQuery({
     queryKey: ["analytics"],
     queryFn: () => analyticsApi.getAnalytics(14),
     retry: false,
   });
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   const stats = analyticsData?.dashboard_stats || mockStats;
   const trends = analyticsData?.patient_trends?.map(t => ({
@@ -85,6 +94,16 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {isError && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-700 dark:bg-amber-900/10 dark:text-amber-400 flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0" />
+          <div>
+            <p className="font-semibold text-sm">Offline Mode</p>
+            <p className="text-xs">Failed to fetch real-time analytics from the backend server. Showing demo analytics data.</p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>

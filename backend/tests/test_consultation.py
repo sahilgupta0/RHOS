@@ -42,9 +42,10 @@ def test_medication_check(client, auth_header, mock_db_setup):
         "allergies": ["Penicillin"],
         "conditions": ["Hypertension"]
     }
-    response = client.post("/consultation/medication/check", json=payload, headers=auth_header)
+    response = client.post("/medicine/check", json=payload, headers=auth_header)
     assert response.status_code == 200
     data = response.json()
-    assert "safety" in data
+    assert "safe_to_prescribe" in data
     assert "interactions" in data
-    assert "recommendations" in data
+    assert "warnings" in data
+    assert "alternatives" in data
