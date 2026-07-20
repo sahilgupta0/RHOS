@@ -66,9 +66,18 @@ jobs:
           pip install -r requirements.txt
         working-directory: backend
 
-      - name: Run Pytest
-        run: python -m pytest
+      - name: Run Pytest with Coverage
+        run: |
+          python -m pytest --cov=app --cov-report=term-missing --cov-report=xml \
+            --cov-fail-under=75 -v
         working-directory: backend
+
+      - name: Upload Backend Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage
+          path: backend/coverage.xml
 
   test-frontend:
     name: Frontend Vitest Suites
@@ -88,9 +97,21 @@ jobs:
         run: npm ci
         working-directory: frontend
 
-      - name: Run Vitest
-        run: npm run test
+      - name: Run Vitest with Coverage
+        run: npm run test -- --run --coverage
         working-directory: frontend
+        continue-on-error: true
+
+      - name: Run Vitest (no coverage fallback)
+        run: npm run test -- --run
+        working-directory: frontend
+
+      - name: Upload Frontend Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-coverage
+          path: frontend/coverage
 
   docker-build:
     name: Docker Build Validation

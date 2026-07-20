@@ -1,0 +1,28 @@
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "--tb=short -q"
+
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "app/migrations/*",
+    "*/venv/*",
+    "*/__pycache__/*",
+    "app/main.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "pass",
+    "except ImportError",
+]
+show_missing = true
+skip_empty = true

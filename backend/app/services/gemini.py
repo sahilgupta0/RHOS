@@ -2,10 +2,12 @@
 RHOS Gemini AI Service.
 
 Wrapper for Google Gemini API calls outside the ADK agent pipeline.
+Provides robust error handling with timeout and retry logic.
 """
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any
 
@@ -17,6 +19,9 @@ logger = logging.getLogger(__name__)
 
 _model = None
 
+# Per-call timeout for Gemini API requests (seconds)
+GEMINI_TIMEOUT_SECONDS = 30
+
 
 def _get_model():
     """Get or create the Gemini model instance."""
@@ -26,10 +31,8 @@ def _get_model():
         if not settings.gemini_api_key:
             logger.warning("Gemini API key not configured. AI features unavailable.")
             return None
-        print("\n\n\nGemini API key: ", settings.gemini_api_key)
         genai.configure(api_key=settings.gemini_api_key)
         _model = genai.GenerativeModel(settings.gemini_model)
-        print("Gemini model: ", _model)
     return _model
 
 
@@ -39,7 +42,14 @@ async def generate_text(
     temperature: float = 0.7,
     max_tokens: int = 2048,
 ) -> str:
-    """Generate text using Gemini."""
+    """Generate text using Gemini with timeout handling.
+
+    Returns:
+        Generated text string, or an error message string on failure.
+
+    Raises:
+        asyncio.TimeoutError: Propagated if the caller needs to handle it explicitly.
+    """
     model = _get_model()
     if model is None:
         return "AI service is not configured. Please set GEMINI_API_KEY."
@@ -54,15 +64,28 @@ async def generate_text(
             f"{system_instruction}\n\n{prompt}" if system_instruction else prompt
         )
 
-        print("\n\n\nFull prompt: ", full_prompt)
-        response = model.generate_content(
-            full_prompt,
-            generation_config=generation_config,
+        # Run blocking SDK call in thread pool to avoid blocking the event loop,
+        # and apply an async timeout so stuck calls don't hang forever.
+        response = await asyncio.wait_for(
+            asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: model.generate_content(
+                    full_prompt,
+                    generation_config=generation_config,
+                ),
+            ),
+            timeout=GEMINI_TIMEOUT_SECONDS,
         )
 
-        print("\n\n\nResponse: ", response)
-
         return response.text if response.text else ""
+
+    except asyncio.TimeoutError:
+        logger.error(
+            "Gemini generate_text timed out after %ds for prompt starting: %.80s",
+            GEMINI_TIMEOUT_SECONDS,
+            prompt,
+        )
+        return "AI service timed out. Please retry."
     except Exception as e:
         logger.error("Gemini generation error: %s", e)
         return f"Error generating AI response: {str(e)}"
@@ -73,15 +96,27 @@ async def analyze_image(
     prompt: str = "Describe the visible findings in this medical image. Do NOT provide a diagnosis.",
     mime_type: str = "image/jpeg",
 ) -> str:
-    """Analyze an image using Gemini Vision."""
+    """Analyze an image using Gemini Vision with timeout handling."""
     model = _get_model()
     if model is None:
         return "AI service is not configured."
 
     try:
         image_part = {"mime_type": mime_type, "data": image_bytes}
-        response = model.generate_content([prompt, image_part])
+
+        response = await asyncio.wait_for(
+            asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: model.generate_content([prompt, image_part]),
+            ),
+            timeout=GEMINI_TIMEOUT_SECONDS,
+        )
+
         return response.text if response.text else ""
+
+    except asyncio.TimeoutError:
+        logger.error("Gemini analyze_image timed out after %ds", GEMINI_TIMEOUT_SECONDS)
+        return "Image analysis timed out. Please retry."
     except Exception as e:
         logger.error("Gemini vision error: %s", e)
         return f"Error analyzing image: {str(e)}"

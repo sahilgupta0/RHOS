@@ -19,6 +19,8 @@ from app.agents.followup_agent import followup_agent
 from app.agents.history_agent import history_agent
 from app.agents.medicine_agent import medicine_agent
 from app.agents.triage_agent import triage_agent
+from app.agents.shared_memory import SharedMemory
+from app.agents.root_agent import run_clinical_pipeline
 from app.dependencies import CurrentUser
 from app.repositories.consultation_repository import ConsultationRepository
 from app.repositories.patient_repository import (
@@ -202,13 +204,10 @@ async def consultation_submit(
     Submit phase — runs the full clinical pipeline for patients.
 
     Triggered when the patient clicks 'Submit for Clinical Review'.
-    Runs: History → Triage → Medicine → Doctor → Follow-up agents.
+    Runs: History → Triage → Medicine → Doctor → Follow-up agents using SharedMemory.
     """
     try:
         consultation = await consultation_repo.get_by_id(request.consultation_id)
-
-        print(f"\n\n\nConsultation_id: {request.consultation_id}\n\n\n")
-        print(f"\n\n\nConsultation: {consultation}\n\n\n")
         if not consultation:
             raise HTTPException(status_code=404, detail="Consultation not found.")
 
@@ -217,155 +216,46 @@ async def consultation_submit(
         chief_complaint = consultation.get("chief_complaint", "")
         conversation_history = consultation.get("conversation_history", [])
 
-        # 1. History Agent
+        # Fetch records from repositories
         history_records = await history_repo.get_by_patient(patient_id)
         allergy_records = await allergy_repo.get_by_patient(patient_id)
         vitals_records = await vitals_repo.get_by_patient(patient_id, limit=5)
 
-        history_prompt = f"""Medical history records:
-History: {json.dumps(history_records, indent=2)}
-Allergies: {json.dumps(allergy_records, indent=2)}
-Recent Vitals: {json.dumps(vitals_records, indent=2)}"""
-
-        hist_response_raw = await generate_text(
-            prompt=history_prompt,
-            system_instruction=history_agent.instruction,
-            temperature=0.3,
-        )
-        try:
-            hist_data = json.loads(
-                hist_response_raw.strip().strip("`").strip("json").strip()
-            )
-        except Exception:
-            hist_data = {
-                "summary": hist_response_raw,
-                "active_conditions": [],
-                "current_medications": [],
-                "allergies": [],
-                "risk_factors": [],
-                "clinical_alerts": [],
-            }
-
-        # 2. Triage Agent
-        triage_prompt = f"""Classify the triage priority (LOW, MEDIUM, HIGH) for the patient case:
-Chief Complaint: {chief_complaint}
-Symptoms: {json.dumps(conv_symptoms)}
-Vitals: {json.dumps(vitals_records, indent=2)}
-Medical History Summary: {hist_data.get('summary', '')}"""
-
-        triage_response_raw = await generate_text(
-            prompt=triage_prompt,
-            system_instruction=triage_agent.instruction,
-            temperature=0.3,
-        )
-        try:
-            triage_data = json.loads(
-                triage_response_raw.strip().strip("`").strip("json").strip()
-            )
-        except Exception:
-            triage_data = {
-                "priority": "MEDIUM",
-                "reasoning": triage_response_raw,
-                "confidence": 0.5,
-                "recommendations": [],
-            }
-
-        # 3. Medicine Agent
-        # Build a summary of the conversation for medicine safety check
-        conversation_text = " ".join(
-            m["content"] for m in conversation_history if m.get("role") == "patient"
-        )
-        medicine_prompt = f"""Verify safety and check for drug conflicts/allergies:
-Conversation: {conversation_text}
-Current Medications: {json.dumps(hist_data.get('current_medications', []))}
-Allergies: {json.dumps(hist_data.get('allergies', []))}
-Conditions: {json.dumps(hist_data.get('active_conditions', []))}"""
-
-        med_response_raw = await generate_text(
-            prompt=medicine_prompt,
-            system_instruction=medicine_agent.instruction,
-            temperature=0.3,
-        )
-        try:
-            med_data = json.loads(
-                med_response_raw.strip().strip("`").strip("json").strip()
-            )
-        except Exception:
-            med_data = {
-                "interactions": [],
-                "allergy_warnings": [],
-                "warnings": [med_response_raw],
-                "safe_to_prescribe": True,
-            }
-
-        # 4. Doctor Agent
-        doctor_prompt = f"""Generate clinical note draft (SOAP format):
-Chief Complaint: {chief_complaint}
-Symptoms: {json.dumps(conv_symptoms)}
-Triage Assessment: {json.dumps(triage_data)}
-Medical History: {json.dumps(hist_data)}
-Medication Review: {json.dumps(med_data)}"""
-
-        doc_response_raw = await generate_text(
-            prompt=doctor_prompt,
-            system_instruction=doctor_agent.instruction,
-            temperature=0.5,
+        # Initialize shared memory
+        memory = SharedMemory(
+            chief_complaint=chief_complaint,
+            conversation_history=conversation_history,
+            symptoms=conv_symptoms,
+            vitals=vitals_records,
+            allergies=[a.get("allergen", "") for a in allergy_records] if allergy_records else [],
+            active_conditions=[h.get("condition", "") for h in history_records] if history_records else [],
+            current_medications=[h.get("medications", "") for h in history_records if h.get("medications")] if history_records else []
         )
 
-        # 5. Follow-up Agent
-        followup_prompt = f"""Generate care coordination & follow-up recommendations:
-Clinical summary: {doc_response_raw}
-Triage: {json.dumps(triage_data)}"""
-
-        followup_response_raw = await generate_text(
-            prompt=followup_prompt,
-            system_instruction=followup_agent.instruction,
-            temperature=0.5,
-        )
-        try:
-            followup_data = json.loads(
-                followup_response_raw.strip().strip("`").strip("json").strip()
-            )
-        except Exception:
-            followup_data = {
-                "follow_up_date": "1 week",
-                "monitoring_instructions": [],
-                "warning_signs": [],
-                "lifestyle_recommendations": [],
-                "asha_worker_tasks": [],
-                "referral_consideration": "none",
-                "patient_education": followup_response_raw,
-            }
+        # Run clinical pipeline sequentially using SharedMemory
+        pipeline_status = await run_clinical_pipeline(memory)
 
         # Append a final summary message to conversation history
         summary_msg = (
             f"✅ Clinical review complete.\n\n"
-            f"**Triage:** {triage_data.get('priority', 'MEDIUM')}\n"
-            f"**Assessment:** {triage_data.get('reasoning', '')}\n\n"
-            f"**Clinical Summary:**\n{doc_response_raw}\n\n"
-            f"**Follow-up Plan:**\n{followup_data.get('patient_education', followup_response_raw)}"
+            f"**Triage:** {memory.triage_priority or 'MEDIUM'}\n"
+            f"**Assessment:** {memory.triage_reasoning}\n\n"
+            f"**Clinical Summary:**\n{memory.clinical_summary}\n\n"
+            f"**Follow-up Plan:**\n{memory.follow_up_plan}"
         )
         conversation_history.append({"role": "assistant", "content": summary_msg})
 
         updates = {
             "conversation_history": conversation_history,
-            "triage_priority": triage_data.get("priority", "MEDIUM"),
-            "triage_reasoning": triage_data.get("reasoning", ""),
-            "history_summary": hist_data.get("summary", ""),
-            "clinical_summary": doc_response_raw,
-            "medication_checks": (
-                med_data.get("interactions", [])
-                + med_data.get("allergy_warnings", [])
-                + [{"warning": w} for w in med_data.get("warnings", [])]
-            ),
-            "follow_up_plan": followup_data.get(
-                "patient_education", followup_response_raw
-            ),
+            "triage_priority": memory.triage_priority or "MEDIUM",
+            "triage_reasoning": memory.triage_reasoning,
+            "history_summary": memory.medical_history_summary,
+            "clinical_summary": memory.clinical_summary,
+            "medication_checks": memory.medication_checks,
+            "follow_up_plan": memory.follow_up_plan,
             "status": "submitted",
             "updated_at": datetime.now().isoformat(),
         }
-        if "follow_up_date" in followup_data:
-            updates["duration"] = followup_data["follow_up_date"]
 
         # Save to MongoDB medical_history collection and append to medical_history.csv
         mh_id = f"MH{uuid.uuid4().hex[:6].upper()}"
@@ -374,7 +264,7 @@ Triage: {json.dumps(triage_data)}"""
             "condition": chief_complaint or "Consultation",
             "diagnosed_date": datetime.now().strftime("%Y-%m-%d"),
             "status": "active",
-            "notes": doc_response_raw,
+            "notes": memory.clinical_summary,
         }
         try:
             await history_repo.create(mh_data, doc_id=mh_id)
@@ -399,7 +289,7 @@ Triage: {json.dumps(triage_data)}"""
                             chief_complaint or "Consultation",
                             datetime.now().strftime("%Y-%m-%d"),
                             "active",
-                            doc_response_raw.replace("\n", " ")
+                            memory.clinical_summary.replace("\n", " ")
                             .replace("\r", " ")
                             .replace('"', '""'),
                         ]
@@ -413,22 +303,15 @@ Triage: {json.dumps(triage_data)}"""
             consultation_id=request.consultation_id,
             agent_response=summary_msg,
             symptoms_extracted=conv_symptoms,
-            triage_priority=triage_data.get("priority", "MEDIUM"),
-            triage_reasoning=triage_data.get("reasoning", ""),
-            history_summary=hist_data.get("summary", ""),
-            clinical_summary=doc_response_raw,
-            medication_checks=med_data.get("interactions", [])
-            + med_data.get("allergy_warnings", []),
-            follow_up_plan=followup_data.get(
-                "patient_education", followup_response_raw
-            ),
+            triage_priority=memory.triage_priority or "MEDIUM",
+            triage_reasoning=memory.triage_reasoning,
+            history_summary=memory.medical_history_summary,
+            clinical_summary=memory.clinical_summary,
+            medication_checks=memory.medication_checks,
+            follow_up_plan=memory.follow_up_plan,
             agent_pipeline_status={
                 "conversation": "completed",
-                "history": "completed",
-                "triage": "completed",
-                "medicine": "completed",
-                "doctor": "completed",
-                "followup": "completed",
+                **pipeline_status,
             },
         )
     except HTTPException:
